@@ -77,7 +77,6 @@ def display():
             weather = get_weather()
             sense.show_message("weather", scroll_speed=0.08)
             sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
-            print(weather)
         #print(alarms)
         time.sleep(1)
 
