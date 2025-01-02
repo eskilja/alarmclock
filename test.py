@@ -9,15 +9,18 @@ sense = SenseHat()
 
 app = Flask(__name__)
 alarms = []
-
+alarm_is_active = False
 
 def check_alarms():
+    global alarm_is_active
     while True:
         now = datetime.datetime.now()
+        alarm_is_active=False
         for alarm in alarms:
             if (now.hour, now.minute) == (alarm["hour"], alarm["minute"]):
                 #winsound.Beep(440, 500)
                 print("Alarm triggered!")
+                alarm_is_active = True   
 
             # ...check if current time matches alarm time and day...
             # ...trigger alarm if matched...
@@ -26,7 +29,13 @@ def check_alarms():
 def display():
     while True:
         now = datetime.datetime.now()
-        sense.show_message(f"{now.hour}:{now.minute:02d}")
+        if alarm_is_active:
+            text_color=(255,0,0)
+        else:
+            text_color=(255,255,255)
+        
+        sense.show_message("time", scroll_speed=0.08)
+        sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
         time.sleep(1)
 
 @app.route("/", methods=["GET", "POST"])
