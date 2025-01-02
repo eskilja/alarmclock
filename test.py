@@ -53,7 +53,7 @@ def index():
 
             selected_days = request.form.getlist("day")
             for day in selected_days:
-                alarms.append({"hour": hour, "minute": minute, "day": day})
+                alarms.append({"hour": hour, "minute": minute, "day": int(day)})
 
         elif "remove_index" in request.form:
             idx = int(request.form["remove_index"])
