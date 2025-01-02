@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, session, redirect, url_for
 import threading
 import time
 import datetime
@@ -11,14 +11,15 @@ except:
     sense = None
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Needed to use sessions
+
 alarms = []
 alarm_is_active = False
-set_temprature = 0
 
 # Replace with your OpenWeatherMap API key
 API_KEY = '9fe7bc1bc1f94de3538a3338cfb6087a'
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-city = "Oslo"  # Replace with whatever city you want
+city = "Oslo"  # Replace with the city you want
 
 # Function to get weather data
 def get_weather():
@@ -37,8 +38,7 @@ def get_weather():
         else:
             return "Weather data unavailable"
     except Exception as e:
-        return "Error fetching weather data"
-
+        return f"Error: {str(e)}"
 
 def check_alarms():
     global alarm_is_active
@@ -49,24 +49,23 @@ def check_alarms():
         for alarm in alarms:
             if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
                 print("Alarm triggered!")
-                alarm_is_active = True   
+                alarm_is_active = True
         time.sleep(1)
 
 def display():
-    global set_temprature
     while True:
         now = datetime.datetime.now()
         if alarm_is_active:
             text_color = (255, 0, 0)
         else:
             text_color = (255, 255, 255)
-        
+
         if sense:
             sense.show_message("time", scroll_speed=0.08)
             sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
-            # Display weather
-            if set_temprature == 1:
+            # Check if temperature display is enabled
+            if session.get('set_temprature', 0) == 1:
                 weather = get_weather()
                 sense.show_message("Temperature", scroll_speed=0.08)
                 sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
@@ -74,7 +73,6 @@ def display():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    global set_temprature
     if request.method == "POST":
         if "time" in request.form:
             time_str = request.form["time"]
@@ -91,12 +89,17 @@ def index():
             if 0 <= idx < len(alarms):
                 alarms.pop(idx)
 
-        # Check if the temperature checkbox is checked
+        # Manage temperature checkbox state
         if "temprature" in request.form:  # If the checkbox is checked
-            set_temprature = 1
+            session['set_temprature'] = 1
+            print("does it work?")
         else:
-            set_temprature = 0  # If the checkbox is not checked
+            session['set_temprature'] = 0  # If the checkbox is not checked
+            print("idk")
 
+        return redirect(url_for('index'))  # Redirect to avoid re-posting form on refresh
+
+    # Display alarms
     alarm_list = []
     day_name = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
     for i, a in enumerate(alarms):
@@ -110,6 +113,10 @@ def index():
             <br>
         """
         )
+
+    # Retrieve temperature setting from session
+    temp_checked = "checked" if session.get('set_temprature', 0) == 1 else ""
+
     return f"""
     <html>
     <head>
@@ -140,7 +147,7 @@ def index():
 
         <h3>Temperature</h3>
         <label for="temprature">Temperature on/off:</label>
-        <input type="checkbox" name="temprature" value="1" {"checked" if set_temprature == 1 else ""}><br>
+        <input type="checkbox" name="temprature" value="1" {temp_checked}><br>
         <button type="submit">Commit</button>
     <p> </p>
     <p>Thank you for using Somali Electric</p>
