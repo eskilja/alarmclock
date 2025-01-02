@@ -149,7 +149,7 @@ def index():
 
         <h3>Temprature</h3>
         <label for="temprature">Temprature on/off:</label>
-        <input type="checkbox" name="temprature" value="1"> Monday<br>
+        <input type="checkbox" name="temprature" value="1" {"checked" if set_temprature == 1 else ""}><br>
         <button type="submit">Commit</button>
     <p> </p>
     <p>Thank you for using somali electric</p>
