@@ -147,12 +147,12 @@ def index():
         <h2>Current Alarms</h2>
         {''.join(alarm_list)}
 
-        <h3>Temprature</h3>
-        <label for="temprature">Temprature on/off:</label>
+        <h3>Temperature</h3>
+        <label for="temprature">Temperature on/off:</label>
         <input type="checkbox" name="temprature" value="1" {"checked" if set_temprature == 1 else ""}><br>
         <button type="submit">Commit</button>
     <p> </p>
-    <p>Thank you for using somali electric</p>
+    <p>Thank you for using Somali Electric</p>
     </body>
     </html>
     """
