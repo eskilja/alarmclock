@@ -13,12 +13,13 @@ except:
 app = Flask(__name__)
 alarms = []
 alarm_is_active = False
+set_temprature = 0
 
 
 # Replace with your OpenWeatherMap API key
 API_KEY = '9fe7bc1bc1f94de3538a3338cfb6087a'
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-city = "Oslo"  # Replace with your desired city
+city = "Oslo"  # Replace with whatever city u want
 
 # Function to get weather data
 def get_weather():
@@ -61,6 +62,7 @@ def check_alarms():
         time.sleep(1)
 
 def display():
+    global set_temprature
     while True:
         now = datetime.datetime.now()
         if alarm_is_active:
@@ -73,15 +75,16 @@ def display():
             sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
             # Display weather
-            weather = get_weather()
-            sense.show_message("weather", scroll_speed=0.08)
-            sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
-            print(weather)
+            if set_temprature == 1:
+                weather = get_weather()
+                sense.show_message("Temprature", scroll_speed=0.08)
+                sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
         #print(alarms)
         time.sleep(1)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    global set_temprature
     if request.method == "POST":
         if "time" in request.form:
             time_str = request.form["time"]
@@ -97,6 +100,12 @@ def index():
             idx = int(request.form["remove_index"])
             if 0 <= idx < len(alarms):
                 alarms.pop(idx)
+
+        if "temprature" in request.form:
+            set_temprature = 1
+        else:
+            set_temprature = 0
+
     alarm_list = []
     day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
     for i, a in enumerate(alarms):
@@ -137,7 +146,12 @@ def index():
         </form>
         <h2>Current Alarms</h2>
         {''.join(alarm_list)}
-    <p></p>
+
+        <h3>Temprature</h3>
+        <label for="temprature">Temprature on/off:</label>
+        <input type="checkbox" name="temprature" value="1"> Monday<br>
+        <button type="submit">Commit</button>
+    <p> </p>
     <p>Thank you for using somali electric</p>
     </body>
     </html>
