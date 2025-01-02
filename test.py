@@ -33,7 +33,7 @@ def get_weather():
             data = response.json()
             temp = data['main']['temp']
             description = data['weather'][0]['description']
-            return f"{temp}°C, {description.capitalize()}"
+            return f"{temp}°C"
         else:
             return "Weather data unavailable"
     except Exception as e:
@@ -76,6 +76,7 @@ def display():
             weather = get_weather()
             sense.show_message("weather", scroll_speed=0.08)
             sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
+            print(weather)
         #print(alarms)
         time.sleep(1)
 
