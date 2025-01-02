@@ -148,4 +148,4 @@ def index():
 if __name__ == "__main__":
     threading.Thread(target=check_alarms, daemon=True).start()
     threading.Thread(target=display, daemon=True).start()
-    app.run(host="0.0.0.0", port=2001)
+    app.run(host="0.0.0.0", port=2000)
