@@ -4,6 +4,7 @@ import time
 import datetime
 import requests
 
+#just so that it works on computers as well
 try:
     from sense_hat import SenseHat
     sense = SenseHat()
