@@ -92,10 +92,8 @@ def index():
         # Manage temperature checkbox state
         if "temprature" in request.form:  # If the checkbox is checked
             session['set_temprature'] = 1
-            print("does it work?")
         else:
             session['set_temprature'] = 0  # If the checkbox is not checked
-            print("idk")
 
         return redirect(url_for('index'))  # Redirect to avoid re-posting form on refresh
 
