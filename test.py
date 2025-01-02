@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request
 import threading
 import time
 import datetime
@@ -11,16 +11,14 @@ except:
     sense = None
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Needed to use sessions
-
 alarms = []
 alarm_is_active = False
-set_temprature = 0  # Global variable to store the temperature setting (1 for on, 0 for off)
+
 
 # Replace with your OpenWeatherMap API key
 API_KEY = '9fe7bc1bc1f94de3538a3338cfb6087a'
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-city = "Oslo"  # Replace with the city you want
+city = "Oslo"  # Replace with your desired city
 
 # Function to get weather data
 def get_weather():
@@ -39,43 +37,51 @@ def get_weather():
         else:
             return "Weather data unavailable"
     except Exception as e:
-        return f"Error: {str(e)}"
+        return "Error fetching weather data"
+
 
 def check_alarms():
     global alarm_is_active
     while True:
         now = datetime.datetime.now()
+        #print(now)
         day_week = now.weekday()
-        alarm_is_active = False
+        #print(day_week)
+        #print(alarms) 
+        #it works but for some reason they still dont work together
+        alarm_is_active=False
         for alarm in alarms:
             if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
+                #winsound.Beep(440, 500)
                 print("Alarm triggered!")
-                alarm_is_active = True
+                alarm_is_active = True   
+
+            # ...check if current time matches alarm time and day...
+            # ...trigger alarm if matched...
         time.sleep(1)
 
 def display():
-    global set_temprature
     while True:
         now = datetime.datetime.now()
         if alarm_is_active:
-            text_color = (255, 0, 0)
+            text_color=(255,0,0)
         else:
-            text_color = (255, 255, 255)
-
+            text_color=(255,255,255)
+        
         if sense:
             sense.show_message("time", scroll_speed=0.08)
             sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
-            # Check if temperature display is enabled
-            if set_temprature == 1:
-                weather = get_weather()
-                sense.show_message("Temperature", scroll_speed=0.08)
-                sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
+            # Display weather
+            weather = get_weather()
+            sense.show_message("weather", scroll_speed=0.08)
+            sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
+            print(weather)
+        #print(alarms)
         time.sleep(1)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    global set_temprature
     if request.method == "POST":
         if "time" in request.form:
             time_str = request.form["time"]
@@ -91,18 +97,8 @@ def index():
             idx = int(request.form["remove_index"])
             if 0 <= idx < len(alarms):
                 alarms.pop(idx)
-
-        # Manage temperature checkbox state
-        if "temprature" in request.form:  # If the checkbox is checked
-            set_temprature = 1
-        else:
-            set_temprature = 0  # If the checkbox is not checked
-
-        return redirect(url_for('index'))  # Redirect to avoid re-posting form on refresh
-
-    # Display alarms
     alarm_list = []
-    day_name = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
+    day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
     for i, a in enumerate(alarms):
         alarm_list.append(
             f"""
@@ -114,10 +110,6 @@ def index():
             <br>
         """
         )
-
-    # Retrieve temperature setting from global variable
-    temp_checked = "checked" if set_temprature == 1 else ""
-
     return f"""
     <html>
     <head>
@@ -145,16 +137,12 @@ def index():
         </form>
         <h2>Current Alarms</h2>
         {''.join(alarm_list)}
-
-        <h3>Temperature</h3>
-        <label for="temprature">Temperature on/off:</label>
-        <input type="checkbox" name="temprature" value="1" {temp_checked}><br>
-        <button type="submit">Commit</button>
-    <p> </p>
-    <p>Thank you for using Somali Electric</p>
+    <p></p>
+    <p>Thank you for using somali electric</p>
     </body>
     </html>
     """
+
 
 if __name__ == "__main__":
     threading.Thread(target=check_alarms, daemon=True).start()
