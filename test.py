@@ -2,10 +2,12 @@ from flask import Flask, request
 import threading
 import time
 import datetime
-from sense_hat import SenseHat
-#import winsound
 
-sense = SenseHat()
+try:
+    from sense_hat import SenseHat
+    sense = SenseHat()
+except:
+    sense = None
 
 app = Flask(__name__)
 alarms = []
@@ -39,8 +41,9 @@ def display():
         else:
             text_color=(255,255,255)
         
-        sense.show_message("time", scroll_speed=0.08)
-        sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+        if sense:
+            sense.show_message("time", scroll_speed=0.08)
+            sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
         #print(alarms)
         time.sleep(1)
 
