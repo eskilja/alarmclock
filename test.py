@@ -2,7 +2,10 @@ from flask import Flask, request
 import threading
 import time
 import datetime
-import winsound
+from sense_hat import SenseHat
+#import winsound
+
+sense = SenseHat()
 
 app = Flask(__name__)
 alarms = []
@@ -13,13 +16,18 @@ def check_alarms():
         now = datetime.datetime.now()
         for alarm in alarms:
             if (now.hour, now.minute) == (alarm["hour"], alarm["minute"]):
-                winsound.Beep(440, 500)
+                #winsound.Beep(440, 500)
                 print("Alarm triggered!")
 
             # ...check if current time matches alarm time and day...
             # ...trigger alarm if matched...
         time.sleep(1)
 
+def display():
+    while True:
+        now = datetime.datetime.now()
+        sense.show_message(f"{now.hour}:{now.minute:02d}")
+        time.sleep(1)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -63,6 +71,7 @@ def index():
         </form>
         <h2>Current Alarms</h2>
         {''.join(alarm_list)}
+        
     </body>
     </html>
     """
@@ -70,4 +79,5 @@ def index():
 
 if __name__ == "__main__":
     threading.Thread(target=check_alarms, daemon=True).start()
-    app.run(host="0.0.0.0", port=80)
+    threading.Thread(target=display, daemon=True).start()
+    app.run(host="0.0.0.0", port=2000)
