@@ -1,4 +1,4 @@
-from flask import Flask, request, session, redirect, url_for
+from flask import Flask, request, redirect, url_for
 import threading
 import time
 import datetime
@@ -15,6 +15,7 @@ app.secret_key = 'your_secret_key'  # Needed to use sessions
 
 alarms = []
 alarm_is_active = False
+set_temprature = 0  # Global variable to store the temperature setting (1 for on, 0 for off)
 
 # Replace with your OpenWeatherMap API key
 API_KEY = '9fe7bc1bc1f94de3538a3338cfb6087a'
@@ -53,6 +54,7 @@ def check_alarms():
         time.sleep(1)
 
 def display():
+    global set_temprature
     while True:
         now = datetime.datetime.now()
         if alarm_is_active:
@@ -65,7 +67,7 @@ def display():
             sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
             # Check if temperature display is enabled
-            if session.get('set_temprature', 0) == 1:
+            if set_temprature == 1:
                 weather = get_weather()
                 sense.show_message("Temperature", scroll_speed=0.08)
                 sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
@@ -73,6 +75,7 @@ def display():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    global set_temprature
     if request.method == "POST":
         if "time" in request.form:
             time_str = request.form["time"]
@@ -91,9 +94,9 @@ def index():
 
         # Manage temperature checkbox state
         if "temprature" in request.form:  # If the checkbox is checked
-            session['set_temprature'] = 1
+            set_temprature = 1
         else:
-            session['set_temprature'] = 0  # If the checkbox is not checked
+            set_temprature = 0  # If the checkbox is not checked
 
         return redirect(url_for('index'))  # Redirect to avoid re-posting form on refresh
 
@@ -112,8 +115,8 @@ def index():
         """
         )
 
-    # Retrieve temperature setting from session
-    temp_checked = "checked" if session.get('set_temprature', 0) == 1 else ""
+    # Retrieve temperature setting from global variable
+    temp_checked = "checked" if set_temprature == 1 else ""
 
     return f"""
     <html>
