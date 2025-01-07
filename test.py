@@ -14,7 +14,12 @@ except:
 app = Flask(__name__)
 alarms = []
 alarm_is_active = False
+curweather = ""
+ttemp = ""
+temp_onoff = False
+weather_onoff = False
 
+#mabye print the ip adress on startup
 
 # Replace with your OpenWeatherMap API key
 API_KEY = '9fe7bc1bc1f94de3538a3338cfb6087a'
@@ -23,6 +28,8 @@ city = "Oslo"  # Replace with your desired city
 
 # Function to get weather data
 def get_weather():
+    global curweather
+    global ttemp
     try:
         params = {
             'q': city,
@@ -33,13 +40,18 @@ def get_weather():
         if response.status_code == 200:
             data = response.json()
             temp = data['main']['temp']
-            description = data['weather'][0]['description']
-            return f"{temp}°C"
-        else:
-            return "Weather data unavailable"
+            description = ['description']
+            curweather = f"{description.capitalize()}"
+            ttemp = f"{temp}°C"
+            return curweather and ttemp
+        else: 
+            curweahter = "Weather data unavalible"
+            ttemp = "Weather data unavalible"
+            return "Weather data unavailable" and curweather and temp
     except Exception as e:
-        return "Error fetching weather data"
-
+        curweather = "error fetching weather data"
+        ttemp = "error fetching weather data"
+        return "Error fetching weather data" and curweather and temp
 
 def check_alarms():
     global alarm_is_active
@@ -75,8 +87,24 @@ def display():
 
             # Display weather
             weather = get_weather()
+            #print(ttemp)
+            #print(curweather)
+            sense.show_message("temprature", scroll_speed=0.08)
+            sense.show_message(ttemp, text_colour=(0, 255, 0), scroll_speed=0.1)
             sense.show_message("weather", scroll_speed=0.08)
-            sense.show_message(weather, text_colour=(0, 255, 0), scroll_speed=0.1)
+            sense.show_message(curweather, text_colour=(0,0,255), scroll_speed=0.1)
+
+        if weather_onoff == True:
+            print("it works")
+        else:
+            print("it doesnt work")
+
+        if temp_onoff == True:
+            print("it works")
+        else:
+            print("but why?")
+
+
         #print(alarms)
         time.sleep(1)
 
@@ -97,6 +125,15 @@ def index():
             idx = int(request.form["remove_index"])
             if 0 <= idx < len(alarms):
                 alarms.pop(idx)
+        #if "weather" in request.form:
+        #    print("it work")
+        #    weather_onoff = True
+            
+
+        #if "temp" in request.form:
+        #    print("it works")
+        #    temp_onoff = True
+
     alarm_list = []
     day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
     for i, a in enumerate(alarms):
@@ -137,6 +174,15 @@ def index():
         </form>
         <h2>Current Alarms</h2>
         {''.join(alarm_list)}
+    <p></p>
+    <h1>List of funktions u can turn on or off</h1>
+    <label for="weather">Weather updates On/OFF:</label>
+    <input type="checkbox" name="weather" value="1"><br>
+    <button type="submit">Commit</button>
+    <p> </p>
+    <label for="temp">Temprature updates ON/OFF:</label>
+    <input type="checkbox" name="temp" value="1"><br>
+    <button type="submit">Commit</button>
     <p></p>
     <p>Thank you for using somali electric</p>
     </body>
