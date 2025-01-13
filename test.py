@@ -113,6 +113,7 @@ def display():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    global weather_onoff
     if request.method == "POST":
         if "time" in request.form:
             time_str = request.form["time"]
@@ -130,12 +131,11 @@ def index():
                 alarms.pop(idx)
 
         if "weather" in request.form:
-            print("it work")
-            weather_onoff = True
+            print(f"weather.request {request.form['weather']}")
+            weather_onoff = bool(int(request.form['weather']))
             
 
         if "temp" in request.form:
-            print("it works")
             temp_onoff = True
 
     alarm_list = []
@@ -180,15 +180,23 @@ def index():
         {''.join(alarm_list)}
     <p> </p>
     <h1>List of funktions u can turn on or off</h1>
-    <label for="weather">Weather updates On/OFF:</label>
-    <input type="checkbox" name="weather" value="1"><br>
-    <button type="submit">Commit</button>
-    <p> </p>
+    <form id="weatherForm" method="POST">
+        <label for="weather">Weather updates On/OFF:</label>
+        <input type="checkbox" name="weather" value="{int(weather_onoff)}" onchange="submitForm()"><br>
+        <p> </p>
+    </form>
     <label for="temp">Temprature updates ON/OFF:</label>
     <input type="checkbox" name="temp" value="1"><br>
     <button type="submit">Commit</button>
     <p> </p>
     <p>Thank you for using somali electric</p>
+    <script>
+    //<![CDATA[
+    function submitForm() {{
+        document.getElementById('weatherForm').submit();
+    }}
+    //]]>
+    </script>
     </body>
     </html>
     """
