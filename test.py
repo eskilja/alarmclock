@@ -114,6 +114,7 @@ def display():
 @app.route("/", methods=["GET", "POST"])
 def index():
     global weather_onoff
+    global temp_onoff
     if request.method == "POST":
         if "time" in request.form:
             time_str = request.form["time"]
@@ -131,12 +132,22 @@ def index():
                 alarms.pop(idx)
 
         if "weather" in request.form:
-            print(f"weather.request {request.form['weather']}")
-            weather_onoff = bool(int(request.form['weather']))
+            #print(f"weather.request {request.form['weather']}")
+            #weather_onoff = bool(int(request.form['weather']))
+            if weather_onoff == True:
+                weather_onoff = False
+            else:
+                weather_onoff = True
+            print(weather_onoff)
             
 
         if "temp" in request.form:
-            temp_onoff = True
+            
+            if temp_onoff == True:
+                temp_onoff = False
+            else:
+                temp_onoff = True
+            print(temp_onoff)
 
     alarm_list = []
     day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
@@ -181,21 +192,28 @@ def index():
     <p> </p>
     <h1>List of funktions u can turn on or off</h1>
     <form id="weatherForm" method="POST">
-        <label for="weather">Weather updates On/OFF:</label>
-        <input type="checkbox" name="weather" value="{int(weather_onoff)}" onchange="submitForm()"><br>
+        {"<label for='weather'>Weather updates On:</label>" if weather_onoff else "<label for='weather'>Weather updates OFF:</label>"}
+        <input type="checkbox" name="weather" value="1" onchange="submitFormW()"><br>
         <p> </p>
     </form>
-    <label for="temp">Temprature updates ON/OFF:</label>
-    <input type="checkbox" name="temp" value="1"><br>
-    <button type="submit">Commit</button>
-    <p> </p>
+    
+    <form id="TempForm" method="POST">
+        {"<label for='temp'>Temprature updates On:</label>" if temp_onoff else "<label for='temp'>Temprature updates OFF:</label>"}
+        <input type="checkbox" name="temp" value="1" onchange="submitFormT()"><br>
+        <p> </p>
+    </form>
+
     <p>Thank you for using somali electric</p>
     <script>
-    //<![CDATA[
-    function submitForm() {{
+
+    function submitFormW() {{
         document.getElementById('weatherForm').submit();
     }}
-    //]]>
+    
+    function submitFormT() {{
+    document.getElementById('TempForm').submit();
+    }}
+
     </script>
     </body>
     </html>
