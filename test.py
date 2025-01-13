@@ -85,24 +85,27 @@ def display():
             sense.show_message("time", scroll_speed=0.08)
             sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
-            # Display weather
+            # Display weather if display weather is true
             weather = get_weather()
             #print(ttemp)
             #print(curweather)
-            sense.show_message("temprature", scroll_speed=0.08)
-            sense.show_message(ttemp, text_colour=(0, 255, 0), scroll_speed=0.1)
-            sense.show_message("weather", scroll_speed=0.08)
-            sense.show_message(curweather, text_colour=(0,0,255), scroll_speed=0.1)
+            if weather_onoff == True:
+                sense.show_message("temprature", scroll_speed=0.08)
+                sense.show_message(ttemp, text_colour=(0, 255, 0), scroll_speed=0.1)
 
-        if weather_onoff == True:
-            print("it works")
-        else:
-            print("it doesnt work")
+            if temp_onoff == True:
+                sense.show_message("weather", scroll_speed=0.08)
+                sense.show_message(curweather, text_colour=(0,0,255), scroll_speed=0.1)
 
-        if temp_onoff == True:
-            print("it works")
-        else:
-            print("but why?")
+        #if weather_onoff == True:
+        #    print("it works")
+        #else:
+        #    print("it doesnt work")
+
+        #if temp_onoff == True:
+        #    print("it works")
+        #else:
+        #    print("but why?")
 
 
         #print(alarms)
@@ -125,14 +128,15 @@ def index():
             idx = int(request.form["remove_index"])
             if 0 <= idx < len(alarms):
                 alarms.pop(idx)
-        #if "weather" in request.form:
-        #    print("it work")
-        #    weather_onoff = True
+
+        if "weather" in request.form:
+            print("it work")
+            weather_onoff = True
             
 
-        #if "temp" in request.form:
-        #    print("it works")
-        #    temp_onoff = True
+        if "temp" in request.form:
+            print("it works")
+            temp_onoff = True
 
     alarm_list = []
     day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
@@ -144,7 +148,7 @@ def index():
                 <input type="hidden" name="remove_index" value="{i}">
                 <button type="submit">Remove</button>
             </form>
-            <br>
+             <br>
         """
         )
     return f"""
@@ -174,7 +178,7 @@ def index():
         </form>
         <h2>Current Alarms</h2>
         {''.join(alarm_list)}
-    <p></p>
+    <p> </p>
     <h1>List of funktions u can turn on or off</h1>
     <label for="weather">Weather updates On/OFF:</label>
     <input type="checkbox" name="weather" value="1"><br>
@@ -183,7 +187,7 @@ def index():
     <label for="temp">Temprature updates ON/OFF:</label>
     <input type="checkbox" name="temp" value="1"><br>
     <button type="submit">Commit</button>
-    <p></p>
+    <p> </p>
     <p>Thank you for using somali electric</p>
     </body>
     </html>
