@@ -18,6 +18,7 @@ curweather = ""
 ttemp = ""
 temp_onoff = False
 weather_onoff = False
+on_off = 1
 
 #mabye print the ip adress on startup
 
@@ -75,40 +76,54 @@ def check_alarms():
 
 def display():
     while True:
-        now = datetime.datetime.now()
-        if alarm_is_active:
-            text_color=(255,0,0)
-        else:
-            text_color=(255,255,255)
+        global on_off
+
+        if on_off == 1:
+            #print("program on")
+            
+            if event.action == "pressed":
+                sense.clear()
+                print("it moved")
+
+
+            else:
+                now = datetime.datetime.now()
+                if alarm_is_active:
+                    text_color=(255,0,0)
+                else:
+                    text_color=(255,255,255)
+            
+                if sense:
+                    sense.show_message("time", scroll_speed=0.08)
+                    sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+
+                    # Display weather if display weather is true
+                    weather = get_weather()
+                    #print(ttemp)
+                    #print(curweather)
+                    if weather_onoff == True:
+                        sense.show_message("temprature", scroll_speed=0.08)
+                        sense.show_message(ttemp, text_colour=(0, 255, 0), scroll_speed=0.1)
+
+                    if temp_onoff == True:
+                        sense.show_message("weather", scroll_speed=0.08)
+                        sense.show_message(curweather, text_colour=(0,0,255), scroll_speed=0.1)
+
+                #if weather_onoff == True:
+                #    print("it works")
+                #else:
+                #    print("it doesnt work")
+
+                #if temp_onoff == True:
+                #    print("it works")
+                #else:
+                #    print("but why?")
+
+
+            #print(alarms)
         
-        if sense:
-            sense.show_message("time", scroll_speed=0.08)
-            sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
-
-            # Display weather if display weather is true
-            weather = get_weather()
-            #print(ttemp)
-            #print(curweather)
-            if weather_onoff == True:
-                sense.show_message("temprature", scroll_speed=0.08)
-                sense.show_message(ttemp, text_colour=(0, 255, 0), scroll_speed=0.1)
-
-            if temp_onoff == True:
-                sense.show_message("weather", scroll_speed=0.08)
-                sense.show_message(curweather, text_colour=(0,0,255), scroll_speed=0.1)
-
-        #if weather_onoff == True:
-        #    print("it works")
-        #else:
-        #    print("it doesnt work")
-
-        #if temp_onoff == True:
-        #    print("it works")
-        #else:
-        #    print("but why?")
-
-
-        #print(alarms)
+        else:
+            print("program off")
         time.sleep(1)
 
 @app.route("/", methods=["GET", "POST"])
