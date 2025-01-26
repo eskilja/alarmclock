@@ -1,4 +1,5 @@
 from flask import Flask, request
+from time import sleep
 import threading
 import time
 import datetime
@@ -18,7 +19,48 @@ curweather = ""
 ttemp = ""
 temp_onoff = False
 weather_onoff = False
+current_display = None
 on_off = 1
+screen = 0
+
+O = [0, 0, 0]       # Black (Off)
+W = [255, 255, 255] # White (On)
+T = [255,0,0] #Red (off is true)
+
+# Define the "ON" pattern
+on = [
+    O, O, W, W, W, W, O, O,
+    O, W, O, O, O, O, W, O,
+    O, W, O, W, W, O, W, O,
+    O, W, O, W, W, O, W, O,
+    O, W, O, W, W, O, W, O,
+    O, W, O, O, O, O, W, O,
+    O, O, W, W, W, W, O, O,
+    O, O, O, O, O, O, O, O,
+]
+
+# Define the "OFF" pattern
+offselect = [
+    O, T, T, T, T, O, O, O,
+    O, T, O, O, O, T, O, O,
+    O, T, O, O, O, T, O, O,
+    O, T, T, T, T, O, O, O,
+    O, T, O, O, O, T, O, O,
+    O, T, O, O, O, T, O, O,
+    O, T, T, T, T, O, O, O,
+    O, O, O, O, O, O, O, O,
+]
+
+offfalse = [
+    O, W, W, W, W, O, O, O,
+    O, W, O, O, O, W, O, O,
+    O, W, O, O, O, W, O, O,
+    O, W, W, W, W, O, O, O,
+    O, W, O, O, O, W, O, O,
+    O, W, O, O, O, W, O, O,
+    O, W, W, W, W, O, O, O,
+    O, O, O, O, O, O, O, O,
+]
 
 #mabye print the ip adress on startup
 
@@ -74,19 +116,66 @@ def check_alarms():
             # ...trigger alarm if matched...
         time.sleep(1)
 
+def display_pattern(pattern, name):
+    global current_display
+    sense.set_pixels(pattern)
+    current_display = name
+
+
 def display():
     while True:
         global on_off
+        global screen
+        global on
+        global offfalse
+        global offselect
+        global current_display
+        
+        if sense.stick.direction_any == "pressed":
+            if sense.stick.direction == "left":
+                screen ==1
+            elif sense.stick.direction == "right":
+                screen == 0
 
-        if on_off == 1:
-            #print("program on")
-            
-            if event.action == "pressed":
-                sense.clear()
-                print("it moved")
-
-
+        if screen == 0:
+            if on_off == 1:
+                display_pattern(on, "on")
             else:
+                display_pattern(offselect, "off")
+
+            if sense.stick.direction_any == "pressed":
+
+                if sense.stick.direction == "up":
+                    if current_display == "on":
+                        sense.clear()
+                        display_pattern(offfalse, "off")
+                    else:
+                        sense.clear()
+                        display_pattern(on, "on")
+                        
+                elif sense.stick.direction == "down":
+                    if current_display == "on":
+                        sense.clear()
+                        display_pattern(offfalse, "off")
+                    else:
+                        sense.clear()
+                        display_pattern(on, "on")
+
+                elif sense.stick.direction == "middle":
+                    if current_display == "on":
+                        on_off == 1
+                    else:
+                        display_pattern(offselect, "off")
+                        sleep(1)
+                        display_pattern(offfalse, "off")
+                        sleep(1)
+                        display_pattern(offselect, "off")
+                        sense.clear()
+
+
+        elif screen ==1:
+            if on_off == 1:
+                #print("program on")
                 now = datetime.datetime.now()
                 if alarm_is_active:
                     text_color=(255,0,0)
@@ -120,10 +209,11 @@ def display():
                 #    print("but why?")
 
 
-            #print(alarms)
+                #print(alarms)
         
-        else:
-            print("program off")
+            else:
+                print("program off")
+
         time.sleep(1)
 
 @app.route("/", methods=["GET", "POST"])
