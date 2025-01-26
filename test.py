@@ -213,6 +213,7 @@ def display():
         
             else:
                 print("program off")
+                sense.clear()
 
         time.sleep(1)
 
