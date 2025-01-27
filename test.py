@@ -21,7 +21,7 @@ temp_onoff = False
 weather_onoff = False
 current_display = None
 on_off = 1
-screen = 1 
+screen = 0
 
 O = [0, 0, 0]       # Black (Off)
 W = [255, 255, 255] # White (On)
@@ -29,36 +29,36 @@ T = [255,0,0] #Red (off is true)
 
 # Define the "ON" pattern
 on = [
-    O, O, W, W, W, W, O, O,
-    O, W, O, O, O, O, W, O,
-    O, W, O, W, W, O, W, O,
-    O, W, O, W, W, O, W, O,
-    O, W, O, W, W, O, W, O,
-    O, W, O, O, O, O, W, O,
-    O, O, W, W, W, W, O, O,
+    O, O, O, O, O, O, O, O,
+    O, W, O, O, W, O, O, W,
+    W, O, W, O, W, W, O, W,
+    W, O, W, O, W, W, O, W,
+    W, O, W, O, W, O, W, W,
+    O, W, O, O, W, O, W, W,
+    O, O, O, O, O, O, O, O,
     O, O, O, O, O, O, O, O,
 ]
 
 # Define the "OFF" pattern
 offselect = [
-    O, T, T, T, T, O, O, O,
-    O, T, O, O, O, T, O, O,
-    O, T, O, O, O, T, O, O,
-    O, T, T, T, T, O, O, O,
-    O, T, O, O, O, T, O, O,
-    O, T, O, O, O, T, O, O,
-    O, T, T, T, T, O, O, O,
+    O, O, O, O, O, O, O, O,
+    O, T, O, T, T, O, T, T,
+    T, O, T, T, O, O, T, O,
+    T, O, T, T, T, O, T, T,
+    T, O, T, T, O, O, T, O,
+    O, T, O, T, O, O, T, O,
+    O, O, O, O, O, O, O, O,
     O, O, O, O, O, O, O, O,
 ]
 
 offfalse = [
-    O, W, W, W, W, O, O, O,
-    O, W, O, O, O, W, O, O,
-    O, W, O, O, O, W, O, O,
-    O, W, W, W, W, O, O, O,
-    O, W, O, O, O, W, O, O,
-    O, W, O, O, O, W, O, O,
-    O, W, W, W, W, O, O, O,
+    O, O, O, O, O, O, O, O,
+    O, W, O, W, W, O, W, W,
+    W, O, W, W, O, O, W, O,
+    W, O, W, W, W, O, W, W,
+    W, O, W, W, O, O, W, O,
+    O, W, O, W, O, O, W, O,
+    O, O, O, O, O, O, O, O,
     O, O, O, O, O, O, O, O,
 ]
 
@@ -129,22 +129,25 @@ def joystick_event(event):
         global current_display
 
         if event.action == "pressed":
+            print(current_display)
             if event.direction == "left":
-                screen ==1
-                print("moved left")
+                if current_display == "on":
+                    sense.clear()
+                    screen ==1
+                    print("moved left")
 
 
             elif event.direction == "right":
+                sense.clear()
                 screen == 0
                 print("moved right")
 
-        if screen == 0:
-            if on_off == 1:
-                display_pattern(on, "on")
-            else:
-                display_pattern(offselect, "off")
+            if screen == 0:
+                if on_off == 1:
+                    display_pattern(on, "on")
+                else:
+                    display_pattern(offselect, "off")
 
-            if event.action == "pressed":
                 if event.direction == "up":
                     if current_display == "on":
                         sense.clear()
@@ -165,7 +168,7 @@ def joystick_event(event):
                         display_pattern(on, "on")
                         print("changed 4")
 
-                elif sense.stick.direction == "middle":
+                elif event.direction == "middle":
                     if current_display == "on":
                         on_off == 1
                     else:
