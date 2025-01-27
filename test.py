@@ -122,25 +122,19 @@ def display_pattern(pattern, name):
     current_display = name
 
 def joystick_event(event):
-
-
-
-def display():
-    while True:
-        global on_off
         global screen
         global on
         global offfalse
         global offselect
         global current_display
-        
-        if sense.stick.direction_any == "pressed":
-            if sense.stick.direction_any == "left":
+
+        if event.action == "pressed":
+            if event.direction == "left":
                 screen ==1
                 print("moved left")
 
 
-            elif sense.stick.direction_any == "right":
+            elif event.direction == "right":
                 screen == 0
                 print("moved right")
 
@@ -150,8 +144,8 @@ def display():
             else:
                 display_pattern(offselect, "off")
 
-            if sense.stick.direction_any == "pressed":
-                if sense.stick.direction == "up":
+            if event.action == "pressed":
+                if event.direction == "up":
                     if current_display == "on":
                         sense.clear()
                         display_pattern(offfalse, "off")
@@ -161,7 +155,7 @@ def display():
                         display_pattern(on, "on")
                         print("changed 2")
                         
-                elif sense.stick.direction == "down":
+                elif event.direction == "down":
                     if current_display == "on":
                         sense.clear()
                         display_pattern(offfalse, "off")
@@ -183,7 +177,19 @@ def display():
                         sense.clear()
 
 
-        elif screen ==1:
+
+def display():
+    while True:
+        global on_off
+        global screen
+        global on
+        global offfalse
+        global offselect
+        global current_display
+        
+        sense.stick.direction_any = joystick_event
+
+        if screen ==1:
             if on_off == 1:
                 #print("program on")
                 now = datetime.datetime.now()
