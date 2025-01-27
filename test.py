@@ -86,15 +86,15 @@ def get_weather():
             description = ['description']
             curweather = f"{description.capitalize()}"
             ttemp = f"{temp}°C"
-            return curweather and ttemp
+            return (curweather, temp)
         else: 
             curweahter = "Weather data unavalible"
             ttemp = "Weather data unavalible"
-            return "Weather data unavailable" and curweather and temp
+            return "Weather data unavailable" or (curweather, temp)
     except Exception as e:
         curweather = "error fetching weather data"
         ttemp = "error fetching weather data"
-        return "Error fetching weather data" and curweather and temp
+        return "Error fetching weather data" or (curweather, temp)
 
 def check_alarms():
     global alarm_is_active
