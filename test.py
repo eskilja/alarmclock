@@ -21,7 +21,7 @@ temp_onoff = False
 weather_onoff = False
 current_display = None
 on_off = 1
-screen = 0
+screen = 1 
 
 O = [0, 0, 0]       # Black (Off)
 W = [255, 255, 255] # White (On)
@@ -121,6 +121,9 @@ def display_pattern(pattern, name):
     sense.set_pixels(pattern)
     current_display = name
 
+def joystick_event(event):
+
+
 
 def display():
     while True:
@@ -132,10 +135,14 @@ def display():
         global current_display
         
         if sense.stick.direction_any == "pressed":
-            if sense.stick.direction == "left":
+            if sense.stick.direction_any == "left":
                 screen ==1
-            elif sense.stick.direction == "right":
+                print("moved left")
+
+
+            elif sense.stick.direction_any == "right":
                 screen == 0
+                print("moved right")
 
         if screen == 0:
             if on_off == 1:
@@ -144,22 +151,25 @@ def display():
                 display_pattern(offselect, "off")
 
             if sense.stick.direction_any == "pressed":
-
                 if sense.stick.direction == "up":
                     if current_display == "on":
                         sense.clear()
                         display_pattern(offfalse, "off")
+                        print("changed 1")
                     else:
                         sense.clear()
                         display_pattern(on, "on")
+                        print("changed 2")
                         
                 elif sense.stick.direction == "down":
                     if current_display == "on":
                         sense.clear()
                         display_pattern(offfalse, "off")
+                        print("changed 3")
                     else:
                         sense.clear()
                         display_pattern(on, "on")
+                        print("changed 4")
 
                 elif sense.stick.direction == "middle":
                     if current_display == "on":
