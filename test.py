@@ -133,7 +133,6 @@ def joystick_event(event):
                 screen ==1
                 print("moved left")
 
-
             elif event.direction == "right":
                 screen == 0
                 print("moved right")
