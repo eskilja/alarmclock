@@ -5,6 +5,9 @@ import time
 import datetime
 import requests
 
+#hvis det er kaldt kanskje vekker deg tidligere fordi det tar lengerer tid å komme til skole
+#angående hvor mye du snur Rpi så har det en effekt på spillet
+
 #just so that it works on computers as well
 try:
     from sense_hat import SenseHat
