@@ -5,9 +5,6 @@ import time
 import datetime
 import requests
 
-#hvis det er kaldt kanskje vekker deg tidligere fordi det tar lengerer tid å komme til skole
-#angående hvor mye du snur Rpi så har det en effekt på spillet
-
 #just so that it works on computers as well
 try:
     from sense_hat import SenseHat
@@ -134,10 +131,10 @@ def joystick_event(event):
         if event.action == "pressed":
             print(current_display)
             if event.direction == "left":
-                if current_display == "on":
-                    sense.clear()
-                    screen ==1
-                    print("moved left")
+                sense.clear()
+                screen ==1
+                print("moved left")
+
 
             elif event.direction == "right":
                 sense.clear()
