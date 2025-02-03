@@ -5,6 +5,9 @@ import time
 import datetime
 import requests
 
+#kanskje legg til sånn at klokken vekker deg 10 min før om det er kaldt ute
+#angående hvor mye du snur Rpi så har det en effekt på spillet
+
 #just so that it works on computers as well
 try:
     from sense_hat import SenseHat
@@ -132,13 +135,13 @@ def joystick_event(event):
             print(current_display)
             if event.direction == "left":
                 sense.clear()
-                screen ==1
+                screen =1
                 print("moved left")
 
 
             elif event.direction == "right":
                 sense.clear()
-                screen == 0
+                screen = 0
                 print("moved right")
 
             if screen == 0:
@@ -169,7 +172,9 @@ def joystick_event(event):
 
                 elif event.direction == "middle":
                     if current_display == "on":
-                        on_off == 1
+                        sense.clear()
+                        screen = 1
+                        on_off = 1
                     else:
                         display_pattern(offselect, "off")
                         sleep(1)
@@ -177,6 +182,8 @@ def joystick_event(event):
                         sleep(1)
                         display_pattern(offselect, "off")
                         sense.clear()
+                        screen = 1
+                        on_off = 1
 
 
 
