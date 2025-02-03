@@ -23,7 +23,7 @@ ttemp = ""
 temp_onoff = False
 weather_onoff = False
 current_display = None
-on_off = 1
+on_off = 0
 screen = 0
 
 O = [0, 0, 0]       # Black (Off)
@@ -138,6 +138,10 @@ def joystick_event(event):
                 sense.clear()
                 screen =1
                 print("moved left")
+                if on_off == 1:
+                    display_pattern(on, "on")
+                elif on_off == 0:
+                    display_pattern(offselect, "off")
 
 
             elif event.direction == "right":
@@ -173,6 +177,8 @@ def joystick_event(event):
                         display_pattern(offfalse, "off")
                         sleep(1)
                         display_pattern(offselect, "off")
+                        sleep(1)
+                        display_pattern(offfalse, "off")
                         print("off")
                         sense.clear()
                         print("off")
