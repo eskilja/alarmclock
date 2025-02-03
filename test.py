@@ -130,6 +130,7 @@ def joystick_event(event):
         global offfalse
         global offselect
         global current_display
+        global on_off
 
         if event.action == "pressed":
             print(current_display)
@@ -147,7 +148,7 @@ def joystick_event(event):
             if screen == 0:
                 if on_off == 1:
                     display_pattern(on, "on")
-                else:
+                elif on_off == 0:
                     display_pattern(offselect, "off")
 
                 if event.direction == "up":
@@ -173,17 +174,21 @@ def joystick_event(event):
                 elif event.direction == "middle":
                     if current_display == "on":
                         sense.clear()
+                        print("on")
                         screen = 1
                         on_off = 1
+                        sleep(1)
                     else:
+                        screen = 1
                         display_pattern(offselect, "off")
                         sleep(1)
                         display_pattern(offfalse, "off")
                         sleep(1)
                         display_pattern(offselect, "off")
                         sense.clear()
-                        screen = 1
-                        on_off = 1
+                        print("off")
+                        on_off = 0
+                        sleep(1)
 
 
 
@@ -197,6 +202,8 @@ def display():
         global current_display
         
         sense.stick.direction_any = joystick_event
+
+        print("current display is", current_display)
 
         if screen ==1:
             if on_off == 1:
