@@ -146,7 +146,7 @@ def joystick_event(event):
                 print("Moved right → Showing ON/OFF status")
                 if on_off == 1:
                     display_pattern(on, "on")
-                else:
+                elif on_off == 0:
                     display_pattern(offselect, "off")
 
             if screen == 0:
@@ -175,6 +175,7 @@ def joystick_event(event):
                         display_pattern(offselect, "off")
                         print("off")
                         sense.clear()
+                        print("off")
                         on_off = 0
                         sleep(1)
 
@@ -190,6 +191,7 @@ def display():
         global current_display
         
         sense.stick.direction_any = joystick_event
+
         print("current display is", current_display)
 
         if screen ==1:
