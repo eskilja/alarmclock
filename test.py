@@ -28,7 +28,7 @@ screen = 0
 
 O = [0, 0, 0]       # Black (Off)
 W = [255, 255, 255] # White (On)
-T = [255,0,0] #Red (off is true)
+T = [255,0,0]       #Red (off is true)
 
 # Define the "ON" pattern
 on = [
@@ -105,15 +105,27 @@ def check_alarms():
         now = datetime.datetime.now()
         #print(now)
         day_week = now.weekday()
+        weathercheck = get_weather()
         #print(day_week)
         #print(alarms) 
         #it works but for some reason they still dont work together
         alarm_is_active=False
         for alarm in alarms:
-            if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
-                #winsound.Beep(440, 500)
-                print("Alarm triggered!")
-                alarm_is_active = True   
+            if ttemp <= 0:
+                #atempting to do some regulering by minusing time depending on how cold it is
+                mintemp = ttemp
+                i = 0
+                while mintemp <=1:
+                    i = i+2
+                    mintemp = mintemp+1
+                if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"]-i, alarm["day"]):
+                    print("Alarm triggered!")
+                    alarm_is_active = True   
+            else:
+                if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
+                    #winsound.Beep(440, 500)
+                    print("Alarm triggered!")
+                    alarm_is_active = True   
 
             # ...check if current time matches alarm time and day...
             # ...trigger alarm if matched...
@@ -240,7 +252,15 @@ def display():
         
             else:
                 print("program off")
-                sense.clear()
+                
+                now = datetime.datetime.now()
+                if alarm_is_active:
+                    text_color=(255,0,0)
+                    sense.show_message("time", scroll_speed=0.08)
+                    sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+                else:
+                    sense.clear()
+
 
         time.sleep(1)
 
