@@ -114,7 +114,7 @@ def check_alarms():
         #it works but for some reason they still dont work together
         alarm_is_active=False
         print("ttemp", ttemp)
-        if ttemp == "N/A":
+        if ttemp == "error fetching weather data" or ttemp == "Weather data unavalible":
             mintemp = 0
         else:
             try:
