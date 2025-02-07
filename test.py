@@ -289,6 +289,7 @@ def display():
                 #print("program on")
                 now = datetime.datetime.now()
                 if alarm_is_active:
+                    print("alarm is on")
                     text_color=(255,0,0)
                     if alarm_on == 1:
                         while alarm_on != 2:
@@ -330,6 +331,7 @@ def display():
                 
                 now = datetime.datetime.now()
                 if alarm_is_active:
+                    print("alarm is on")
                     if alarm_on == 0:
                         text_color=(255,0,0)
                         sense.show_message("time", scroll_speed=0.08)
