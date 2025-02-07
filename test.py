@@ -4,6 +4,7 @@ import threading
 import time
 import datetime
 import requests
+import random
 
 #kanskje legg til sånn at klokken vekker deg 10 min før om det er kaldt ute
 #angående hvor mye du snur Rpi så har det en effekt på spillet
@@ -25,6 +26,8 @@ weather_onoff = False
 current_display = None
 on_off = 0
 screen = 0
+alarm_on =0
+Game = 1
 
 O = [0, 0, 0]       # Black (Off)
 W = [255, 255, 255] # White (On)
@@ -143,6 +146,7 @@ def joystick_event(event):
         global offselect
         global current_display
         global on_off
+        global alarm_on
 
         if event.action == "pressed":
             print(current_display)
@@ -164,6 +168,9 @@ def joystick_event(event):
                     display_pattern(on, "on")
                 elif on_off == 0:
                     display_pattern(offselect, "off")
+            elif event.direction == "middle":
+                if alarm_is_active:
+                    alarm_on = 1
 
             if screen == 0:
                 if event.direction == "up" or event.direction == "down":
@@ -207,6 +214,8 @@ def display():
         global offfalse
         global offselect
         global current_display
+        global alarm_on
+        global Game
         
         sense.stick.direction_any = joystick_event
 
@@ -255,12 +264,85 @@ def display():
                 
                 now = datetime.datetime.now()
                 if alarm_is_active:
-                    text_color=(255,0,0)
-                    sense.show_message("time", scroll_speed=0.08)
-                    sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+                    while alarm_on != 2:
+                        if alarm_on == 1:
+                            green = (0, 255, 0)
+                            red = (255, 0, 0)
+                            black = (0, 0, 0)
+
+                            snake = [(3, 3)]
+                            food = (random.randint(0, 7), random.randint(0, 7))
+                            direction = 'right'
+
+                            def draw():
+                                sense.clear()
+                                for segment in snake:
+                                    sense.set_pixel(segment[0], segment[1], green)
+                                sense.set_pixel(food[0], food[1], red)
+
+                            def move_snake():
+                                global food
+                                head_x, head_y = snake[0]
+                                if direction == 'up':
+                                    head_y -= 1
+                                elif direction == 'down':
+                                    head_y += 1
+                                elif direction == 'left':
+                                    head_x -= 1
+                                elif direction == 'right':
+                                    head_x += 1
+                                
+                                if head_x < 0 or head_x >7 or head_y <0 or head_y >7:
+                                    sense.show_message("Game Over!", text_colour=red)
+                                    sense.clear()
+                                    return False
+                                
+                                new_head = (head_x, head_y)
+
+                                if new_head in snake:  # Game over if snake runs into itself
+                                    sense.show_message("Game Over!", text_colour=red)
+                                    sense.clear()
+                                    return False
+                                
+                                snake.insert(0, new_head)
+                                
+                                if new_head == food:
+                                    food = (random.randint(0, 7), random.randint(0, 7))
+                                else:
+                                    snake.pop()
+                                
+                                return True
+
+                            def get_tilt_direction():
+                                global direction
+                                acceleration = sense.get_accelerometer_raw()
+                                x = acceleration['x']
+                                y = acceleration['y']
+                                
+                                if abs(x) > abs(y):  # Tilt left/right
+                                    if x < -0.3:
+                                        direction = 'left'
+                                    elif x > 0.3:
+                                        direction = 'right'
+                                else:  # Tilt up/down
+                                    if y < -0.3:
+                                        direction = 'up'
+                                    elif y > 0.3:
+                                        direction = 'down'
+
+                            while True:
+                                get_tilt_direction()
+                                if not move_snake():
+                                    break
+                                draw()
+                                time.sleep(0.3)
+                        else:
+                            text_color=(255,0,0)
+                            sense.show_message("time", scroll_speed=0.08)
+                            sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+                            #play the alarm at high volume so that you can't igonre the alarm
                 else:
                     sense.clear()
-
 
         time.sleep(1)
 
@@ -268,6 +350,7 @@ def display():
 def index():
     global weather_onoff
     global temp_onoff
+    global Game
     if request.method == "POST":
         if "time" in request.form:
             time_str = request.form["time"]
@@ -301,6 +384,10 @@ def index():
             else:
                 temp_onoff = True
             print(temp_onoff)
+
+        if "number_input" in request.form:
+            Game = int(request.form["number_input"])
+            print(f"User entered number: {Game}")  # You can process the number as needed
 
     alarm_list = []
     day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
@@ -356,6 +443,11 @@ def index():
         <p> </p>
     </form>
 
+    <form id="gameamount" method="POST">
+        <label for="number_input">Enter how many apples u have to eat to beat the game:</label>
+        <input type=="number" name="number_input" requierd>
+    </form>
+
     <p>Thank you for using somali electric</p>
     <script>
 
@@ -365,6 +457,10 @@ def index():
     
     function submitFormT() {{
     document.getElementById('TempForm').submit();
+    }}
+
+    function submitFormG() {{
+    document.getElementById('gameamount').submit();
     }}
 
     </script>
