@@ -129,7 +129,7 @@ def check_alarms():
 
         for alarm in alarms:
             if mintemp <= 0:
-                print("alarmen er satt på",alarm["hour"], alarm["minute"], alarm["day"])
+                print("alarmen er satt på. dag", alarm["hour"], "minut", alarm["minute"], "dag",alarm["day"])
                 #atempting to do some regulering by minusing time depending on how cold it is
                 
                 i = 0
