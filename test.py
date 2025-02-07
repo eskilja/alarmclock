@@ -103,7 +103,7 @@ def get_weather():
         return "Error fetching weather data" or (curweather, temp)
 
 def check_alarms():
-    global alarm_is_active
+    global alarm_is_active, alarm_on
     while True:
         now = datetime.datetime.now()
         #print(now)
@@ -124,15 +124,78 @@ def check_alarms():
                 if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"]-i, alarm["day"]):
                     print("Alarm triggered!")
                     alarm_is_active = True   
+                    alarm_on = 0
             else:
                 if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
                     #winsound.Beep(440, 500)
                     print("Alarm triggered!")
-                    alarm_is_active = True   
+                    alarm_is_active = True
+                    alarm_on = 0   
 
             # ...check if current time matches alarm time and day...
             # ...trigger alarm if matched...
         time.sleep(1)
+
+def play_snake_game():
+    global alarm_on, Game
+    green, red, black = (0, 255, 0), (255, 0, 0), (0, 0, 0)
+
+    while alarm_on == 1:
+        snake = [(3, 3)]
+        food = (random.randint(0, 7), random.randint(0, 7))
+        direction = 'right'
+        apples_eaten = 0
+
+        def draw():
+            sense.clear()
+            for segment in snake:
+                sense.set_pixel(segment[0], segment[1], green)
+            sense.set_pixel(food[0], food[1], red)
+
+        def move_snake():
+            nonlocal food, apples_eaten
+            head_x, head_y = snake[0]
+            if direction == 'up': head_y -= 1
+            elif direction == 'down': head_y += 1
+            elif direction == 'left': head_x -= 1
+            elif direction == 'right': head_x += 1
+
+            if head_x < 0 or head_x > 7 or head_y < 0 or head_y > 7 or (head_x, head_y) in snake:
+                return False  # Game over
+
+            new_head = (head_x, head_y)
+            snake.insert(0, new_head)
+
+            if new_head == food:
+                apples_eaten += 1
+                food = (random.randint(0, 7), random.randint(0, 7))
+            else:
+                snake.pop()
+
+            return True
+
+        def get_tilt_direction():
+            nonlocal direction
+            acceleration = sense.get_accelerometer_raw()
+            x, y = acceleration['x'], acceleration['y']
+            if abs(x) > abs(y):
+                if x < -0.3: direction = 'left'
+                elif x > 0.3: direction = 'right'
+            else:
+                if y < -0.3: direction = 'up'
+                elif y > 0.3: direction = 'down'
+
+        while apples_eaten < Game:
+            get_tilt_direction()
+            if not move_snake():
+                sense.show_message("Try Again!", text_colour=red)
+                break
+            draw()
+            time.sleep(0.3)
+
+        if apples_eaten >= Game:
+            sense.show_message("You Win!", text_colour=green)
+            alarm_on = 2  # Stop alarm
 
 def display_pattern(pattern, name):
     global current_display
@@ -227,6 +290,9 @@ def display():
                 now = datetime.datetime.now()
                 if alarm_is_active:
                     text_color=(255,0,0)
+                    if alarm_on == 1:
+                        while alarm_on != 2:
+                            play_snake_game()
                 else:
                     text_color=(255,255,255)
             
@@ -238,11 +304,11 @@ def display():
                     weather = get_weather()
                     #print(ttemp)
                     #print(curweather)
-                    if weather_onoff == True:
+                    if weather_onoff == True and alarm_is_active != True:
                         sense.show_message("temprature", scroll_speed=0.08)
                         sense.show_message(ttemp, text_colour=(0, 255, 0), scroll_speed=0.1)
 
-                    if temp_onoff == True:
+                    if temp_onoff == True and alarm_is_active != True:
                         sense.show_message("weather", scroll_speed=0.08)
                         sense.show_message(curweather, text_colour=(0,0,255), scroll_speed=0.1)
 
@@ -264,83 +330,13 @@ def display():
                 
                 now = datetime.datetime.now()
                 if alarm_is_active:
-                    while alarm_on != 2:
-                        if alarm_on == 1:
-                            green = (0, 255, 0)
-                            red = (255, 0, 0)
-                            black = (0, 0, 0)
-
-                            snake = [(3, 3)]
-                            food = (random.randint(0, 7), random.randint(0, 7))
-                            direction = 'right'
-
-                            def draw():
-                                sense.clear()
-                                for segment in snake:
-                                    sense.set_pixel(segment[0], segment[1], green)
-                                sense.set_pixel(food[0], food[1], red)
-
-                            def move_snake():
-                                global food
-                                head_x, head_y = snake[0]
-                                if direction == 'up':
-                                    head_y -= 1
-                                elif direction == 'down':
-                                    head_y += 1
-                                elif direction == 'left':
-                                    head_x -= 1
-                                elif direction == 'right':
-                                    head_x += 1
-                                
-                                if head_x < 0 or head_x >7 or head_y <0 or head_y >7:
-                                    sense.show_message("Game Over!", text_colour=red)
-                                    sense.clear()
-                                    return False
-                                
-                                new_head = (head_x, head_y)
-
-                                if new_head in snake:  # Game over if snake runs into itself
-                                    sense.show_message("Game Over!", text_colour=red)
-                                    sense.clear()
-                                    return False
-                                
-                                snake.insert(0, new_head)
-                                
-                                if new_head == food:
-                                    food = (random.randint(0, 7), random.randint(0, 7))
-                                else:
-                                    snake.pop()
-                                
-                                return True
-
-                            def get_tilt_direction():
-                                global direction
-                                acceleration = sense.get_accelerometer_raw()
-                                x = acceleration['x']
-                                y = acceleration['y']
-                                
-                                if abs(x) > abs(y):  # Tilt left/right
-                                    if x < -0.3:
-                                        direction = 'left'
-                                    elif x > 0.3:
-                                        direction = 'right'
-                                else:  # Tilt up/down
-                                    if y < -0.3:
-                                        direction = 'up'
-                                    elif y > 0.3:
-                                        direction = 'down'
-
-                            while True:
-                                get_tilt_direction()
-                                if not move_snake():
-                                    break
-                                draw()
-                                time.sleep(0.3)
-                        else:
-                            text_color=(255,0,0)
-                            sense.show_message("time", scroll_speed=0.08)
-                            sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
-                            #play the alarm at high volume so that you can't igonre the alarm
+                    if alarm_on == 0:
+                        text_color=(255,0,0)
+                        sense.show_message("time", scroll_speed=0.08)
+                        sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+                    else:
+                        while alarm_on != 2:
+                            play_snake_game()
                 else:
                     sense.clear()
 
