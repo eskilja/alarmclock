@@ -114,7 +114,7 @@ def check_alarms():
         #it works but for some reason they still dont work together
         alarm_is_active=False
         if ttemp != "N/A":
-            mintemp = float(ttemp)
+            mintemp = float(int(ttemp))
         else:
             mintemp = 1
         for alarm in alarms:
