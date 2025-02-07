@@ -117,6 +117,7 @@ def check_alarms():
         if ttemp == "error fetching weather data" or ttemp == "Weather data unavalible":
             mintemp = 0
             print("mintep (ttemp didnt work)", mintemp)
+
         else:
             try:
                 mintemp = float(ttemp)  # Convert ttemp to a float
@@ -127,7 +128,7 @@ def check_alarms():
                 print("again ttemp", ttemp)
 
         for alarm in alarms:
-            if ttemp <= 0:
+            if mintemp <= 0:
                 #atempting to do some regulering by minusing time depending on how cold it is
                 
                 i = 0
