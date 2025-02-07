@@ -31,8 +31,13 @@ def move_snake():
     elif direction == 'right':
         head_x += 1
     
-    new_head = (head_x % 8, head_y % 8)
+    if head_x < 0 or head_x >7 or head_y <0 or head_y >7:
+        sense.show_message("Game Over!", text_colour=red)
+        sense.clear()
+        return False
     
+    new_head = (head_x, head_y)
+
     if new_head in snake:  # Game over if snake runs into itself
         sense.show_message("Game Over!", text_colour=red)
         sense.clear()
