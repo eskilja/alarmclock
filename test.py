@@ -113,6 +113,7 @@ def check_alarms():
         #print(alarms) 
         #it works but for some reason they still dont work together
         alarm_is_active=False
+        print("ttemp", ttemp)
         if ttemp == "N/A":
             mintemp = 0
         else:
@@ -121,6 +122,8 @@ def check_alarms():
             except ValueError:
                 mintemp = 0  # Handle invalid numeric values by assigning a default
                 print("it didnt work :(")
+                print("mintemp", mintemp)
+                print("again ttemp", ttemp)
 
         for alarm in alarms:
             if ttemp <= 0:
