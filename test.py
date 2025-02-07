@@ -113,11 +113,11 @@ def check_alarms():
         #print(alarms) 
         #it works but for some reason they still dont work together
         alarm_is_active=False
-        if ttemp == "N/A":
+        if ttemp != "N/A":
             mintemp = int(ttemp)
             float(mintemp)
-        else:
-            mintemp = 1
+        elif ttemp == "N/A":
+            mintemp = 0
         for alarm in alarms:
             if ttemp <= 0:
                 #atempting to do some regulering by minusing time depending on how cold it is
