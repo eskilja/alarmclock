@@ -103,7 +103,7 @@ def get_weather():
         return "Error fetching weather data" or (curweather, temp)
 
 def check_alarms():
-    global alarm_is_active, alarm_on
+    global alarm_is_active
     while True:
         now = datetime.datetime.now()
         #print(now)
@@ -128,8 +128,7 @@ def check_alarms():
                 print("again ttemp", ttemp)
 
         for alarm in alarms:
-            if mintemp <= 0:
-                print("alarmen er satt på. dag", alarm["hour"], "minut", alarm["minute"], "dag",alarm["day"])
+            if ttemp <= 0:
                 #atempting to do some regulering by minusing time depending on how cold it is
                 
                 i = 0
@@ -356,6 +355,7 @@ def display():
                             play_snake_game()
                 else:
                     sense.clear()
+
 
         time.sleep(1)
 
