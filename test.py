@@ -108,7 +108,6 @@ def check_alarms():
         now = datetime.datetime.now()
         day_week = now.weekday()
         weathercheck = get_weather()
-        alarm_is_active = False
         print("Current time:", now)
         print("Day of the week:", day_week)
         print("Alarms:", alarms)
@@ -136,11 +135,15 @@ def check_alarms():
                     print("Alarm triggered!")
                     alarm_is_active = True
                     alarm_on = 0
+                else:
+                    alarm_is_active = False
             else:
                 if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
                     print("Alarm triggered!")
                     alarm_is_active = True
                     alarm_on = 0
+                else:
+                    alarm_is_active = False
 
         time.sleep(1)
 
@@ -148,62 +151,70 @@ def play_snake_game():
     global alarm_on, alarm_is_active, Game
     green, red, black = (0, 255, 0), (255, 0, 0), (0, 0, 0)
 
-    snake = [(3, 3)]
-    food = (random.randint(0, 7), random.randint(0, 7))
-    direction = 'right'
-    apples_eaten = 0
+    try:
+        snake = [(3, 3)]
+        food = (random.randint(0, 7), random.randint(0, 7))
+        direction = 'right'
+        apples_eaten = 0
 
-    def draw():
-        sense.clear()
-        for segment in snake:
-            sense.set_pixel(segment[0], segment[1], green)
-        sense.set_pixel(food[0], food[1], red)
+        def draw():
+            sense.clear()
+            for segment in snake:
+                sense.set_pixel(segment[0], segment[1], green)
+            sense.set_pixel(food[0], food[1], red)
 
-    def move_snake():
-        nonlocal food, apples_eaten
-        head_x, head_y = snake[0]
-        if direction == 'up': head_y -= 1
-        elif direction == 'down': head_y += 1
-        elif direction == 'left': head_x -= 1
-        elif direction == 'right': head_x += 1
+        def move_snake():
+            nonlocal food, apples_eaten
+            head_x, head_y = snake[0]
+            if direction == 'up': head_y -= 1
+            elif direction == 'down': head_y += 1
+            elif direction == 'left': head_x -= 1
+            elif direction == 'right': head_x += 1
 
-        if head_x < 0 or head_x > 7 or head_y < 0 or head_y > 7 or (head_x, head_y) in snake:
-            return False  # Game over
+            if head_x < 0 or head_x > 7 or head_y < 0 or head_y > 7 or (head_x, head_y) in snake:
+                return False  # Game over
 
-        new_head = (head_x, head_y)
-        snake.insert(0, new_head)
+            new_head = (head_x, head_y)
+            snake.insert(0, new_head)
 
-        if new_head == food:
-            apples_eaten += 1
-            food = (random.randint(0, 7), random.randint(0, 7))
-        else:
-            snake.pop()
+            if new_head == food:
+                apples_eaten += 1
+                food = (random.randint(0, 7), random.randint(0, 7))
+            else:
+                snake.pop()
 
-        return True
+            return True
 
-    def get_tilt_direction():
-        nonlocal direction
-        acceleration = sense.get_accelerometer_raw()
-        x, y = acceleration['x'], acceleration['y']
-        if abs(x) > abs(y):
-            if x < -0.3: direction = 'left'
-            elif x > 0.3: direction = 'right'
-        else:
-            if y < -0.3: direction = 'up'
-            elif y > 0.3: direction = 'down'
+        def get_tilt_direction():
+            nonlocal direction
+            acceleration = sense.get_accelerometer_raw()
+            x, y = acceleration['x'], acceleration['y']
+            if abs(x) > abs(y):
+                if x < -0.3: direction = 'left'
+                elif x > 0.3: direction = 'right'
+            else:
+                if y < -0.3: direction = 'up'
+                elif y > 0.3: direction = 'down'
 
-    while apples_eaten < Game:
-        get_tilt_direction()
-        if not move_snake():
-            sense.show_message("Try Again!", text_colour=red)
-            break
-        draw()
-        time.sleep(0.3)
+        while apples_eaten < Game:
+            get_tilt_direction()
+            if not move_snake():
+                sense.show_message("Try Again!", text_colour=red)
+                break
+            draw()
+            time.sleep(0.3)
 
-    if apples_eaten >= Game:
-        sense.show_message("You Win!", text_colour=green)
-        alarm_on = 2  # Game completed
-        alarm_is_active = False  # Turn off the alarm
+        if apples_eaten >= Game:
+            sense.show_message("You Win!", text_colour=green)
+            alarm_on = 2  # Game completed
+            alarm_is_active = False  # Turn off the alarm
+
+    except Exception as e:
+        print(f"Error in play_snake_game: {e}")
+        sense.show_message("Error!", text_colour=red)
+        alarm_on = 2  # Ensure the alarm is turned off even if an error occurs
+        alarm_is_active = False
+
 
 def display_pattern(pattern, name):
     global current_display
@@ -227,10 +238,10 @@ def joystick_event(event):
             sense.clear()
             screen = 1
             print("Moved left")
-            if on_off == 1:
-                display_pattern(on, "on")
-            elif on_off == 0:
-                display_pattern(offselect, "off")
+            #if on_off == 1:
+            #    display_pattern(on, "on")
+            #elif on_off == 0:
+            #    display_pattern(offselect, "off")
 
         elif event.direction == "right":
             sense.clear()
