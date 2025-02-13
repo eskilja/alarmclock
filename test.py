@@ -290,7 +290,7 @@ def display():
         global alarm_is_active
         global Game
 
-        sense.stick.direction_any = joystick_event()
+        sense.stick.direction_any = joystick_event
 
         print("Current display is", current_display)
 
