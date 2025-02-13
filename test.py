@@ -26,7 +26,7 @@ weather_onoff = False
 current_display = None
 on_off = 0
 screen = 0
-alarm_on =0
+alarm_on = 0
 Game = 1
 
 O = [0, 0, 0]       # Black (Off)
@@ -103,7 +103,7 @@ def get_weather():
         return "Error fetching weather data" or (curweather, temp)
 
 def check_alarms():
-    global alarm_is_active
+    global alarm_is_active, alarm_on
     while True:
         now = datetime.datetime.now()
         day_week = now.weekday()
@@ -134,15 +134,13 @@ def check_alarms():
                     print("Alarm triggered!")
                     alarm_is_active = True
                     alarm_on = 0
-                else:
-                    alarm_is_active = False
+
             else:
                 if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
                     print("Alarm triggered!")
                     alarm_is_active = True
                     alarm_on = 0
-                else:
-                    alarm_is_active = False
+
 
         time.sleep(1)
 
@@ -163,6 +161,7 @@ def play_snake_game():
             sense.set_pixel(food[0], food[1], red)
 
         def move_snake():
+            global alarm_on
             nonlocal food, apples_eaten
             head_x, head_y = snake[0]
             if direction == 'up': head_y -= 1
@@ -171,6 +170,7 @@ def play_snake_game():
             elif direction == 'right': head_x += 1
 
             if head_x < 0 or head_x > 7 or head_y < 0 or head_y > 7 or (head_x, head_y) in snake:
+                alarm_on = 0
                 return False  # Game over
 
             new_head = (head_x, head_y)
@@ -308,6 +308,7 @@ def display():
         if screen == 1:
             if on_off == 1:
                 now = datetime.datetime.now()
+                print("VIKTIG!!!", alarm_is_active)
                 if alarm_is_active:
                     print("Alarm is on")
                     text_color = (255, 0, 0)
