@@ -145,65 +145,65 @@ def check_alarms():
         time.sleep(1)
 
 def play_snake_game():
-    global alarm_on, Game
+    global alarm_on, alarm_is_active, Game
     green, red, black = (0, 255, 0), (255, 0, 0), (0, 0, 0)
 
-    while alarm_on == 1:
-        snake = [(3, 3)]
-        food = (random.randint(0, 7), random.randint(0, 7))
-        direction = 'right'
-        apples_eaten = 0
+    snake = [(3, 3)]
+    food = (random.randint(0, 7), random.randint(0, 7))
+    direction = 'right'
+    apples_eaten = 0
 
-        def draw():
-            sense.clear()
-            for segment in snake:
-                sense.set_pixel(segment[0], segment[1], green)
-            sense.set_pixel(food[0], food[1], red)
+    def draw():
+        sense.clear()
+        for segment in snake:
+            sense.set_pixel(segment[0], segment[1], green)
+        sense.set_pixel(food[0], food[1], red)
 
-        def move_snake():
-            nonlocal food, apples_eaten
-            head_x, head_y = snake[0]
-            if direction == 'up': head_y -= 1
-            elif direction == 'down': head_y += 1
-            elif direction == 'left': head_x -= 1
-            elif direction == 'right': head_x += 1
+    def move_snake():
+        nonlocal food, apples_eaten
+        head_x, head_y = snake[0]
+        if direction == 'up': head_y -= 1
+        elif direction == 'down': head_y += 1
+        elif direction == 'left': head_x -= 1
+        elif direction == 'right': head_x += 1
 
-            if head_x < 0 or head_x > 7 or head_y < 0 or head_y > 7 or (head_x, head_y) in snake:
-                return False  # Game over
+        if head_x < 0 or head_x > 7 or head_y < 0 or head_y > 7 or (head_x, head_y) in snake:
+            return False  # Game over
 
-            new_head = (head_x, head_y)
-            snake.insert(0, new_head)
+        new_head = (head_x, head_y)
+        snake.insert(0, new_head)
 
-            if new_head == food:
-                apples_eaten += 1
-                food = (random.randint(0, 7), random.randint(0, 7))
-            else:
-                snake.pop()
+        if new_head == food:
+            apples_eaten += 1
+            food = (random.randint(0, 7), random.randint(0, 7))
+        else:
+            snake.pop()
 
-            return True
+        return True
 
-        def get_tilt_direction():
-            nonlocal direction
-            acceleration = sense.get_accelerometer_raw()
-            x, y = acceleration['x'], acceleration['y']
-            if abs(x) > abs(y):
-                if x < -0.3: direction = 'left'
-                elif x > 0.3: direction = 'right'
-            else:
-                if y < -0.3: direction = 'up'
-                elif y > 0.3: direction = 'down'
+    def get_tilt_direction():
+        nonlocal direction
+        acceleration = sense.get_accelerometer_raw()
+        x, y = acceleration['x'], acceleration['y']
+        if abs(x) > abs(y):
+            if x < -0.3: direction = 'left'
+            elif x > 0.3: direction = 'right'
+        else:
+            if y < -0.3: direction = 'up'
+            elif y > 0.3: direction = 'down'
 
-        while apples_eaten < Game:
-            get_tilt_direction()
-            if not move_snake():
-                sense.show_message("Try Again!", text_colour=red)
-                break
-            draw()
-            time.sleep(0.3)
+    while apples_eaten < Game:
+        get_tilt_direction()
+        if not move_snake():
+            sense.show_message("Try Again!", text_colour=red)
+            break
+        draw()
+        time.sleep(0.3)
 
-        if apples_eaten >= Game:
-            sense.show_message("You Win!", text_colour=green)
-            alarm_on = 2  # Stop alarm
+    if apples_eaten >= Game:
+        sense.show_message("You Win!", text_colour=green)
+        alarm_on = 2  # Game completed
+        alarm_is_active = False  # Turn off the alarm
 
 def display_pattern(pattern, name):
     global current_display
@@ -218,6 +218,7 @@ def joystick_event(event):
     global current_display
     global on_off
     global alarm_on
+    global alarm_is_active
 
     if event.action == "pressed":
         print(current_display)
@@ -238,9 +239,11 @@ def joystick_event(event):
                 display_pattern(on, "on")
             elif on_off == 0:
                 display_pattern(offselect, "off")
-        elif event.direction == "middle":
-            if alarm_is_active:
-                alarm_on = 1
+
+        elif event.direction == "middle":  # Joystick pressed down
+            if alarm_is_active and alarm_on == 0:  # Start the game only if the alarm is active
+                print("Joystick pressed down - starting Snake game")
+                alarm_on = 1  # Start the game
 
         if screen == 0:
             if event.direction == "up" or event.direction == "down":
@@ -284,6 +287,7 @@ def display():
         global offselect
         global current_display
         global alarm_on
+        global alarm_is_active
         global Game
 
         sense.stick.direction_any = joystick_event
@@ -296,13 +300,13 @@ def display():
                 if alarm_is_active:
                     print("Alarm is on")
                     text_color = (255, 0, 0)
-                    if alarm_on == 1:
-                        while alarm_on != 2:
-                            play_snake_game()
+                    sense.show_message("ALARM!", scroll_speed=0.08, text_colour=text_color)
+                    sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+
+                    if alarm_on == 1:  # Start the game if joystick is pressed
+                        play_snake_game()
                 else:
                     text_color = (255, 255, 255)
-
-                if sense:
                     sense.show_message("time", scroll_speed=0.08)
                     sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
@@ -317,16 +321,15 @@ def display():
 
             else:
                 print("Program off")
-                now = datetime.datetime.now()
+                
                 if alarm_is_active:
                     print("Alarm is on")
-                    if alarm_on == 0:
-                        text_color = (255, 0, 0)
-                        sense.show_message("time", scroll_speed=0.08)
-                        sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
-                    else:
-                        while alarm_on != 2:
-                            play_snake_game()
+                    text_color = (255, 0, 0)
+                    sense.show_message("ALARM!", scroll_speed=0.08, text_colour=text_color)
+                    sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
+
+                    if alarm_on == 1:  # Start the game if joystick is pressed
+                        play_snake_game()
                 else:
                     sense.clear()
 
