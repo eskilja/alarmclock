@@ -106,18 +106,16 @@ def check_alarms():
     global alarm_is_active
     while True:
         now = datetime.datetime.now()
-        #print(now)
         day_week = now.weekday()
         weathercheck = get_weather()
-        #print(day_week)
-        #print(alarms) 
-        #it works but for some reason they still dont work together
-        alarm_is_active=False
-        print("ttemp", ttemp)
+        alarm_is_active = False
+        print("Current time:", now)
+        print("Day of the week:", day_week)
+        print("Alarms:", alarms)
+
         if ttemp == "error fetching weather data" or ttemp == "Weather data unavalible":
             mintemp = 0
             print("mintep (ttemp didnt work)", mintemp)
-
         else:
             try:
                 mintemp = float(ttemp)  # Convert ttemp to a float
@@ -128,26 +126,22 @@ def check_alarms():
                 print("again ttemp", ttemp)
 
         for alarm in alarms:
-            if ttemp <= 0:
-                #atempting to do some regulering by minusing time depending on how cold it is
-                
+            if mintemp <= 0:
+                print("Alarm set for day", alarm["day"], "hour", alarm["hour"], "minute", alarm["minute"])
                 i = 0
-                while mintemp <=1:
-                    i = i+2
-                    mintemp = mintemp+1
-                if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"]-i, alarm["day"]):
+                while mintemp <= 1:
+                    i = i + 2
+                    mintemp = mintemp + 1
+                if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"] - i, alarm["day"]):
                     print("Alarm triggered!")
-                    alarm_is_active = True   
+                    alarm_is_active = True
                     alarm_on = 0
             else:
                 if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
-                    #winsound.Beep(440, 500)
                     print("Alarm triggered!")
                     alarm_is_active = True
-                    alarm_on = 0   
+                    alarm_on = 0
 
-            # ...check if current time matches alarm time and day...
-            # ...trigger alarm if matched...
         time.sleep(1)
 
 def play_snake_game():
@@ -217,69 +211,67 @@ def display_pattern(pattern, name):
     current_display = name
 
 def joystick_event(event):
-        global screen
-        global on
-        global offfalse
-        global offselect
-        global current_display
-        global on_off
-        global alarm_on
+    global screen
+    global on
+    global offfalse
+    global offselect
+    global current_display
+    global on_off
+    global alarm_on
 
-        if event.action == "pressed":
-            print(current_display)
-            if event.direction == "left":
-                sense.clear()
-                screen =1
-                print("moved left")
-                if on_off == 1:
+    if event.action == "pressed":
+        print(current_display)
+        if event.direction == "left":
+            sense.clear()
+            screen = 1
+            print("Moved left")
+            if on_off == 1:
+                display_pattern(on, "on")
+            elif on_off == 0:
+                display_pattern(offselect, "off")
+
+        elif event.direction == "right":
+            sense.clear()
+            screen = 0  # Switch to status display mode
+            print("Moved right → Showing ON/OFF status")
+            if on_off == 1:
+                display_pattern(on, "on")
+            elif on_off == 0:
+                display_pattern(offselect, "off")
+        elif event.direction == "middle":
+            if alarm_is_active:
+                alarm_on = 1
+
+        if screen == 0:
+            if event.direction == "up" or event.direction == "down":
+                if current_display == "on":
+                    display_pattern(offfalse, "off")
+                    print("Preparing to turn OFF")
+                else:
                     display_pattern(on, "on")
-                elif on_off == 0:
-                    display_pattern(offselect, "off")
+                    print("Preparing to turn ON")
 
-
-            elif event.direction == "right":
-                sense.clear()
-                screen = 0  # Switch to status display mode
-                print("Moved right → Showing ON/OFF status")
-                if on_off == 1:
-                    display_pattern(on, "on")
-                elif on_off == 0:
-                    display_pattern(offselect, "off")
             elif event.direction == "middle":
-                if alarm_is_active:
-                    alarm_on = 1
-
-            if screen == 0:
-                if event.direction == "up" or event.direction == "down":
-                    # Prepare to toggle ON/OFF
-                    if current_display == "on":
-                        display_pattern(offfalse, "off")
-                        print("Preparing to turn OFF")
-                    else:
-                        display_pattern(on, "on")
-                        print("Preparing to turn ON")
-
-                elif event.direction == "middle":
-                    if current_display == "on":
-                        sense.clear()
-                        print("on")
-                        screen = 1
-                        on_off = 1
-                        sleep(1)
-                    else:
-                        screen = 1
-                        display_pattern(offselect, "off")
-                        sleep(1)
-                        display_pattern(offfalse, "off")
-                        sleep(1)
-                        display_pattern(offselect, "off")
-                        sleep(1)
-                        display_pattern(offfalse, "off")
-                        print("off")
-                        sense.clear()
-                        print("off")
-                        on_off = 0
-                        sleep(1)
+                if current_display == "on":
+                    sense.clear()
+                    print("on")
+                    screen = 1
+                    on_off = 1
+                    sleep(1)
+                else:
+                    screen = 1
+                    display_pattern(offselect, "off")
+                    sleep(1)
+                    display_pattern(offfalse, "off")
+                    sleep(1)
+                    display_pattern(offselect, "off")
+                    sleep(1)
+                    display_pattern(offfalse, "off")
+                    print("off")
+                    sense.clear()
+                    print("off")
+                    on_off = 0
+                    sleep(1)
 
 
 
@@ -293,61 +285,43 @@ def display():
         global current_display
         global alarm_on
         global Game
-        
+
         sense.stick.direction_any = joystick_event
 
-        print("current display is", current_display)
+        print("Current display is", current_display)
 
-        if screen ==1:
+        if screen == 1:
             if on_off == 1:
-                #print("program on")
                 now = datetime.datetime.now()
                 if alarm_is_active:
-                    print("alarm is on")
-                    text_color=(255,0,0)
+                    print("Alarm is on")
+                    text_color = (255, 0, 0)
                     if alarm_on == 1:
                         while alarm_on != 2:
                             play_snake_game()
                 else:
-                    text_color=(255,255,255)
-            
+                    text_color = (255, 255, 255)
+
                 if sense:
                     sense.show_message("time", scroll_speed=0.08)
                     sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
-                    # Display weather if display weather is true
                     weather = get_weather()
-                    #print(ttemp)
-                    #print(curweather)
-                    if weather_onoff == True and alarm_is_active != True:
-                        sense.show_message("temprature", scroll_speed=0.08)
+                    if weather_onoff and not alarm_is_active:
+                        sense.show_message("temperature", scroll_speed=0.08)
                         sense.show_message(ttemp, text_colour=(0, 255, 0), scroll_speed=0.1)
 
-                    if temp_onoff == True and alarm_is_active != True:
+                    if temp_onoff and not alarm_is_active:
                         sense.show_message("weather", scroll_speed=0.08)
-                        sense.show_message(curweather, text_colour=(0,0,255), scroll_speed=0.1)
+                        sense.show_message(curweather, text_colour=(0, 0, 255), scroll_speed=0.1)
 
-                #if weather_onoff == True:
-                #    print("it works")
-                #else:
-                #    print("it doesnt work")
-
-                #if temp_onoff == True:
-                #    print("it works")
-                #else:
-                #    print("but why?")
-
-
-                #print(alarms)
-        
             else:
-                print("program off")
-                
+                print("Program off")
                 now = datetime.datetime.now()
                 if alarm_is_active:
-                    print("alarm is on")
+                    print("Alarm is on")
                     if alarm_on == 0:
-                        text_color=(255,0,0)
+                        text_color = (255, 0, 0)
                         sense.show_message("time", scroll_speed=0.08)
                         sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
                     else:
@@ -355,7 +329,6 @@ def display():
                             play_snake_game()
                 else:
                     sense.clear()
-
 
         time.sleep(1)
 
