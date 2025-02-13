@@ -209,7 +209,7 @@ def play_snake_game():
             alarm_is_active = False  # Turn off the alarm
 
     except Exception as e:
-        print(f"Error in play_snake_game: {e}")
+        print(f"Error in play_snake_game: {e.with_traceback()}")
         sense.show_message("Error!", text_colour=red)
         alarm_on = 2  # Ensure the alarm is turned off even if an error occurs
         alarm_is_active = False
