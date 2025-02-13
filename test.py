@@ -128,10 +128,9 @@ def check_alarms():
             if mintemp <= 0:
                 print("Alarm set for day", alarm["day"], "hour", alarm["hour"], "minute", alarm["minute"])
                 i = 0
-                while mintemp <= 1:
-                    i = i + 2
-                    mintemp = mintemp + 1
-                if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"] - i, alarm["day"]):
+                i += (-2 * mintemp)
+
+                if (now.hour*60+now.minute, day_week) == (alarm["hour"]*60+alarm["minute"]-i, alarm["day"]):
                     print("Alarm triggered!")
                     alarm_is_active = True
                     alarm_on = 0
