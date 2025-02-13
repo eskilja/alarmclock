@@ -316,7 +316,11 @@ def display():
                     sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
                     if alarm_on == 1:  # Start the game if joystick is pressed
-                        play_snake_game()
+                        try:
+                            play_snake_game()
+
+                        except Exception as e:
+                            print(f"Error in play_snake_game: {e.with_traceback()}")
                 else:
                     text_color = (255, 255, 255)
                     sense.show_message("time", scroll_speed=0.08)
@@ -341,7 +345,11 @@ def display():
                     sense.show_message(f"{now.hour}:{now.minute:02d}", text_colour=text_color, scroll_speed=0.1)
 
                     if alarm_on == 1:  # Start the game if joystick is pressed
-                        play_snake_game()
+                        try:
+                            play_snake_game()
+                            
+                        except Exception as e:
+                            print(f"Error in play_snake_game: {e.with_traceback()}")
                 else:
                     sense.clear()
 
