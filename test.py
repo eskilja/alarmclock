@@ -222,6 +222,7 @@ def joystick_event(event):
 
     if event.action == "pressed":
         print(current_display)
+        print(f"Joystick pressed: {event.direction}")  # Debugging
         if event.direction == "left":
             sense.clear()
             screen = 1
