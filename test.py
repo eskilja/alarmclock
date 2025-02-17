@@ -395,8 +395,14 @@ def index():
             print(temp_onoff)
 
         if "number_input" in request.form:
-            Game = int(request.form["number_input"])
-            print(f"User entered number: {Game}")  # You can process the number as needed
+            if int(request.form["number_input"]) <= 60:
+                Game = int(request.form["number_input"])
+                print(f"User entered number: {Game}")  
+
+            else:
+                print(f"User entered number: {Game}")  
+                Game = 60
+                print(Game)
 
     alarm_list = []
     day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
@@ -455,6 +461,7 @@ def index():
     <form id="gameamount" method="POST">
         <label for="number_input">Enter how many apples u have to eat to beat the game:</label>
         <input type=="number" name="number_input" requierd>
+        <p> </p>
     </form>
 
     <p>Thank you for using somali electric</p>
