@@ -142,15 +142,16 @@ def check_alarms():
 
                 if (now.hour*60+now.minute, day_week) == (alarm["hour"]*60+alarm["minute"]-i, alarm["day"]):
                     print("Alarm triggered!")
+                    if alarm_is_active == False:
+                        alarm_on = 0
                     alarm_is_active = True
-                    alarm_on = 0
 
             else:
                 if (now.hour, now.minute, day_week) == (alarm["hour"], alarm["minute"], alarm["day"]):
                     print("Alarm triggered!")
+                    if alarm_is_active == False:
+                        alarm_on = 0
                     alarm_is_active = True
-                    alarm_on = 0
-
 
         time.sleep(1)
 
