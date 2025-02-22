@@ -231,6 +231,7 @@ def display_pattern(pattern, name):
     current_display = name
 
 def joystick_handler(pushed: Joystick):
+    print(f"pushed: {pushed}")
     global screen
     global on
     global offfalse
@@ -331,14 +332,16 @@ def display():
         sense.stick.direction_any = joystick_event
 
         print("Current display is", current_display)
+        print(joystick_queue.qsize())
+
+        try:
+            pushed = joystick_queue.get(block=False)
+            joystick_handler(pushed)
+        except Empty:
+            pass
+
 
         if screen == 1:
-            try:
-                pushed = joystick_queue.get(block=False)
-                joystick_handler(pushed)
-            except Empty:
-                pass
-
             if on_off == 1:
                 now = datetime.datetime.now()
                 print("VIKTIG!!!", alarm_is_active)
