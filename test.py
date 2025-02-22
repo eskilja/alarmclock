@@ -1,5 +1,7 @@
 from flask import Flask, request
 from time import sleep
+from enum import Enum
+from queue import Queue, Empty, Full
 import threading
 import time
 import datetime
@@ -28,6 +30,14 @@ on_off = 0
 screen = 0
 alarm_on = 0
 Game = 1
+joystick_queue = Queue(maxsize=3)
+
+class Joystick(Enum):
+    UP = 1
+    DOWN = 2
+    LEFT = 3
+    RIGHT = 4
+    MIDDLE = 5
 
 O = [0, 0, 0]       # Black (Off)
 W = [255, 255, 255] # White (On)
@@ -220,7 +230,7 @@ def display_pattern(pattern, name):
     sense.set_pixels(pattern)
     current_display = name
 
-def joystick_event(event):
+def joystick_handler(pushed: Joystick):
     global screen
     global on
     global offfalse
@@ -230,63 +240,80 @@ def joystick_event(event):
     global alarm_on
     global alarm_is_active
 
+    if pushed == Joystick.LEFT:
+        sense.clear()
+        screen = 1
+        print("Moved left")
+        #if on_off == 1:
+        #    display_pattern(on, "on")
+        #elif on_off == 0:
+        #    display_pattern(offselect, "off")
+
+    elif pushed == Joystick.RIGHT:
+        sense.clear()
+        screen = 0  # Switch to status display mode
+        print("Moved right → Showing ON/OFF status")
+        if on_off == 1:
+            display_pattern(on, "on")
+        elif on_off == 0:
+            display_pattern(offselect, "off")
+
+    elif pushed == Joystick.MIDDLE:  # Joystick pressed down
+        if alarm_is_active and alarm_on == 0:  # Start the game only if the alarm is active
+            print("Joystick pressed down - starting Snake game")
+            alarm_on = 1  # Start the game
+
+    if screen == 0:
+        if pushed == Joystick.UP or pushed == Joystick.DOWN:
+            if current_display == "on":
+                display_pattern(offfalse, "off")
+                print("Preparing to turn OFF")
+            else:
+                display_pattern(on, "on")
+                print("Preparing to turn ON")
+
+        elif pushed == Joystick.MIDDLE:
+            if current_display == "on":
+                sense.clear()
+                print("on")
+                screen = 1
+                on_off = 1
+                sleep(1)
+            else:
+                screen = 1
+                display_pattern(offselect, "off")
+                sleep(1)
+                display_pattern(offfalse, "off")
+                sleep(1)
+                display_pattern(offselect, "off")
+                sleep(1)
+                display_pattern(offfalse, "off")
+                print("off")
+                sense.clear()
+                print("off")
+                on_off = 0
+                sleep(1)
+
+
+
+def joystick_event(event):
     if event.action == "pressed":
         print(current_display)
         print(f"Joystick pressed: {event.direction}")  # Debugging
-        if event.direction == "left":
-            sense.clear()
-            screen = 1
-            print("Moved left")
-            #if on_off == 1:
-            #    display_pattern(on, "on")
-            #elif on_off == 0:
-            #    display_pattern(offselect, "off")
-
-        elif event.direction == "right":
-            sense.clear()
-            screen = 0  # Switch to status display mode
-            print("Moved right → Showing ON/OFF status")
-            if on_off == 1:
-                display_pattern(on, "on")
-            elif on_off == 0:
-                display_pattern(offselect, "off")
-
-        elif event.direction == "middle":  # Joystick pressed down
-            if alarm_is_active and alarm_on == 0:  # Start the game only if the alarm is active
-                print("Joystick pressed down - starting Snake game")
-                alarm_on = 1  # Start the game
-
-        if screen == 0:
-            if event.direction == "up" or event.direction == "down":
-                if current_display == "on":
-                    display_pattern(offfalse, "off")
-                    print("Preparing to turn OFF")
-                else:
-                    display_pattern(on, "on")
-                    print("Preparing to turn ON")
-
-            elif event.direction == "middle":
-                if current_display == "on":
-                    sense.clear()
-                    print("on")
-                    screen = 1
-                    on_off = 1
-                    sleep(1)
-                else:
-                    screen = 1
-                    display_pattern(offselect, "off")
-                    sleep(1)
-                    display_pattern(offfalse, "off")
-                    sleep(1)
-                    display_pattern(offselect, "off")
-                    sleep(1)
-                    display_pattern(offfalse, "off")
-                    print("off")
-                    sense.clear()
-                    print("off")
-                    on_off = 0
-                    sleep(1)
-
+        try:
+            match event.direction:
+                case "left":
+                    joystick_queue.put(Joystick.LEFT, block=False)
+                case "right":
+                    joystick_queue.put(Joystick.RIGHT, block=False)
+                case "middle":
+                    joystick_queue.put(Joystick.MIDDLE, block=False)
+                case "up":
+                    joystick_queue.put(Joystick.UP, block=False)
+                case "down":
+                    joystick_queue.put(Joystick.DOWN, block=False)
+        except Full:
+            pass #vi ignorerer inputet
 
 
 def display():
@@ -306,6 +333,12 @@ def display():
         print("Current display is", current_display)
 
         if screen == 1:
+            try:
+                pushed = joystick_queue.get(block=False)
+                joystick_handler(pushed)
+            except Empty:
+                pass
+
             if on_off == 1:
                 now = datetime.datetime.now()
                 print("VIKTIG!!!", alarm_is_active)
