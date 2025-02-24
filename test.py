@@ -118,25 +118,25 @@ def check_alarms():
         now = datetime.datetime.now()
         day_week = now.weekday()
         weathercheck = get_weather()
-        print("Current time:", now)
-        print("Day of the week:", day_week)
-        print("Alarms:", alarms)
+        #print("Current time:", now)
+        #print("Day of the week:", day_week)
+        #print("Alarms:", alarms)
 
         if ttemp == "error fetching weather data" or ttemp == "Weather data unavalible":
             mintemp = 0
-            print("mintep (ttemp didnt work)", mintemp)
+            #print("mintep (ttemp didnt work)", mintemp)
         else:
             try:
                 mintemp = float(ttemp)  # Convert ttemp to a float
             except ValueError:
                 mintemp = 0  # Handle invalid numeric values by assigning a default
-                print("it didnt work :(")
-                print("mintemp", mintemp)
-                print("again ttemp", ttemp)
+                #print("it didnt work :(")
+                #print("mintemp", mintemp)
+                #print("again ttemp", ttemp)
 
         for alarm in alarms:
             if mintemp <= 0:
-                print("Alarm set for day", alarm["day"], "hour", alarm["hour"], "minute", alarm["minute"])
+                #print("Alarm set for day", alarm["day"], "hour", alarm["hour"], "minute", alarm["minute"])
                 i = 0
                 i += (-2 * mintemp)
 
@@ -246,7 +246,7 @@ def joystick_handler(pushed: Joystick):
     if pushed == Joystick.LEFT:
         sense.clear()
         screen = 1
-        print("Moved left")
+        #print("Moved left")
         #if on_off == 1:
         #    display_pattern(on, "on")
         #elif on_off == 0:
@@ -255,7 +255,7 @@ def joystick_handler(pushed: Joystick):
     elif pushed == Joystick.RIGHT:
         sense.clear()
         screen = 0  # Switch to status display mode
-        print("Moved right → Showing ON/OFF status")
+        #print("Moved right → Showing ON/OFF status")
         if on_off == 1:
             display_pattern(on, "on")
         elif on_off == 0:
@@ -263,22 +263,22 @@ def joystick_handler(pushed: Joystick):
 
     elif pushed == Joystick.MIDDLE:  # Joystick pressed down
         if alarm_is_active and alarm_on == 0:  # Start the game only if the alarm is active
-            print("Joystick pressed down - starting Snake game")
+            #print("Joystick pressed down - starting Snake game")
             alarm_on = 1  # Start the game
 
     if screen == 0:
         if pushed == Joystick.UP or pushed == Joystick.DOWN:
             if current_display == "on":
                 display_pattern(offfalse, "off")
-                print("Preparing to turn OFF")
+                #print("Preparing to turn OFF")
             else:
                 display_pattern(on, "on")
-                print("Preparing to turn ON")
+                #print("Preparing to turn ON")
 
         elif pushed == Joystick.MIDDLE:
             if current_display == "on":
                 sense.clear()
-                print("on")
+                #print("on")
                 screen = 1
                 on_off = 1
                 sleep(1)
@@ -291,9 +291,8 @@ def joystick_handler(pushed: Joystick):
                 display_pattern(offselect, "off")
                 sleep(1)
                 display_pattern(offfalse, "off")
-                print("off")
                 sense.clear()
-                print("off")
+                #print("off")
                 on_off = 0
                 sleep(1)
 
@@ -301,8 +300,8 @@ def joystick_handler(pushed: Joystick):
 
 def joystick_event(event):
     if event.action == "pressed":
-        print(current_display)
-        print(f"Joystick pressed: {event.direction}")  # Debugging
+        #print(current_display)
+        #print(f"Joystick pressed: {event.direction}")  # Debugging
         try:
             match event.direction:
                 case "left":
@@ -333,8 +332,8 @@ def display():
 
         sense.stick.direction_any = joystick_event
 
-        print("Current display is", current_display)
-        print(joystick_queue.qsize())
+        #print("Current display is", current_display)
+        #print(joystick_queue.qsize())
 
         try:
             pushed = joystick_queue.get(block=False)
@@ -346,7 +345,7 @@ def display():
         if screen == 1:
             if on_off == 1:
                 now = datetime.datetime.now()
-                print("VIKTIG!!!", alarm_is_active)
+                #print("VIKTIG!!!", alarm_is_active)
                 if alarm_is_active:
                     print("Alarm is on")
                     text_color = (255, 0, 0)
@@ -374,7 +373,7 @@ def display():
                         sense.show_message(curweather, text_colour=(0, 0, 255), scroll_speed=0.1)
 
             else:
-                print("Program off")
+                #print("Program off")
                 
                 if alarm_is_active:
                     print("Alarm is on")
@@ -421,7 +420,7 @@ def index():
                 weather_onoff = False
             else:
                 weather_onoff = True
-            print(weather_onoff)
+            #print(weather_onoff)
             
 
         if "temp" in request.form:
@@ -430,7 +429,7 @@ def index():
                 temp_onoff = False
             else:
                 temp_onoff = True
-            print(temp_onoff)
+            #print(temp_onoff)
 
         if "number_input" in request.form:
             if int(request.form["number_input"]) <= 60:
@@ -440,7 +439,7 @@ def index():
             else:
                 print(f"User entered number: {Game}")  
                 Game = 60
-                print(Game)
+                print(f"new score is: {Game}")  
 
     alarm_list = []
     day_name={0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
