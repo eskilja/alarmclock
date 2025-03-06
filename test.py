@@ -34,7 +34,7 @@ weather_onoff = False
 current_display = None
 on_off = 0
 screen = 0
-alarm_on = 0
+alarm_on = 2
 Game = 1
 joystick_queue = Queue(maxsize=3)
 
@@ -188,7 +188,7 @@ def play_sound():
     if alarm_is_active and alarm_on == 0:
         print("playing the sound file")
         alarm_sound.play()
-        time.sleep(4444)
+        time.sleep(4)
         
     time.sleep(1)
 
