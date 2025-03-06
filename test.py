@@ -7,6 +7,8 @@ import time
 import datetime
 import requests
 import random
+import pygame
+import os
 
 #kanskje legg til sånn at klokken vekker deg 10 min før om det er kaldt ute
 #angående hvor mye du snur Rpi så har det en effekt på spillet
@@ -17,6 +19,10 @@ try:
     sense = SenseHat()
 except:
     sense = None
+
+
+#starts pygame mixer
+pygame.mixer.init()
 
 app = Flask(__name__)
 alarms = []
@@ -156,6 +162,37 @@ def check_alarms():
 
         time.sleep(1)
 
+def play_sound():
+    global alarm_is_active, alarm_on
+
+    # gets the location of the folder we are inn
+    file_dir = os.path.dirname(__file__)
+    print("file dir =", file_dir)
+    print("------------")
+
+    #the sound file we are trying to play
+    sound_file = "police_s.wav"
+    print("sound file is", sound_file)
+    print("------------")
+
+    # this is where we define evryting together
+    sound_path = os.path.join(file_dir, sound_file)
+    print("sound path is", sound_path)
+    print("------------")
+
+    #this loads the file and readies it to be played
+    alarm_sound = pygame.mixer.Sound(sound_path)
+    print("alarm sound is", alarm_sound)
+    print("------------")
+
+    if alarm_is_active and alarm_on == 0:
+        print("playing the sound file")
+        alarm_sound.play()
+        time.sleep(4444)
+        
+    time.sleep(1)
+
+
 def play_snake_game():
     global alarm_on, alarm_is_active, Game
     green, red, black = (0, 255, 0), (255, 0, 0), (0, 0, 0)
@@ -211,6 +248,7 @@ def play_snake_game():
             get_tilt_direction()
             if not move_snake():
                 sense.show_message("Try Again!", text_colour=red)
+                #alarm_on = 0 # Game failed
                 break
             draw()
             time.sleep(0.3)
@@ -525,4 +563,5 @@ def index():
 if __name__ == "__main__":
     threading.Thread(target=check_alarms, daemon=True).start()
     threading.Thread(target=display, daemon=True).start()
+    threading.Thread(target=play_sound, daemon=True).start()
     app.run(host="0.0.0.0", port=2000)
