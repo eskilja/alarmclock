@@ -163,34 +163,35 @@ def check_alarms():
         time.sleep(1)
 
 def play_sound():
-    global alarm_is_active, alarm_on
+    while True:
+        global alarm_is_active, alarm_on
 
-    # gets the location of the folder we are inn
-    file_dir = os.path.dirname(__file__)
-    print("file dir =", file_dir)
-    print("------------")
+        # gets the location of the folder we are inn
+        file_dir = os.path.dirname(__file__)
+        print("file dir =", file_dir)
+        print("------------")
 
-    #the sound file we are trying to play
-    sound_file = "police_s.wav"
-    print("sound file is", sound_file)
-    print("------------")
+        #the sound file we are trying to play
+        sound_file = "police_s.wav"
+        print("sound file is", sound_file)
+        print("------------")
 
-    # this is where we define evryting together
-    sound_path = os.path.join(file_dir, sound_file)
-    print("sound path is", sound_path)
-    print("------------")
+        # this is where we define evryting together
+        sound_path = os.path.join(file_dir, sound_file)
+        print("sound path is", sound_path)
+        print("------------")
 
-    #this loads the file and readies it to be played
-    alarm_sound = pygame.mixer.Sound(sound_path)
-    print("alarm sound is", alarm_sound)
-    print("------------")
+        #this loads the file and readies it to be played
+        alarm_sound = pygame.mixer.Sound(sound_path)
+        print("alarm sound is", alarm_sound)
+        print("------------")
 
-    if alarm_is_active and alarm_on == 0:
-        print("playing the sound file")
-        alarm_sound.play()
-        time.sleep(4)
-        
-    time.sleep(1)
+        if alarm_is_active and alarm_on == 0:
+            print("playing the sound file")
+            alarm_sound.play()
+            time.sleep(4)
+            
+        time.sleep(1)
 
 
 def play_snake_game():
